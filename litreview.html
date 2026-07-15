@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lit review — GSV-Jakarta</title>
+<meta name="description" content="Literature grounding for GSV-Jakarta across five themes: pedestrian detection, street view imagery in urban research, walkability, gender and mobility, and domain adaptation in computer vision.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">GSV<span>·Jakarta</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="maps.html" class="nav-link">Maps</a>
+      <a href="segmentation.html" class="nav-link">Segmentation</a>
+      <a href="gender.html" class="nav-link">Gender</a>
+      <a href="litreview.html" class="nav-link active">Lit review</a>
+      <a href="methods.html" class="nav-link">Methods</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <p class="eyebrow">Literature</p>
+      <h1 class="page-title">Lit review</h1>
+      <p class="page-intro">Five strands of literature this project sits against &mdash; where the pipeline's design choices come from, and where the r&nbsp;=&nbsp;0.09 finding sits relative to what the field would predict.</p>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <p class="card-eyebrow">Bucket 1</p>
+      <h2>Pedestrian detection methods</h2>
+      <div class="prose">
+        <p>Automated pedestrian detection has advanced steadily since YOLOv3 established single-pass bounding-box regression, through to YOLOv8's anchor-free head. Attribute-recognition benchmarks like PA-100K and PETA, paired with EfficientNet backbones, made gender and age classification from crops feasible at scale. The consistent limitation across this body of work: every dataset and evaluation protocol reflects Western or East Asian surveillance environments &mdash; fixed cameras, temperate climates, Western clothing norms. Even the first proof that GSV imagery could substitute for manual pedestrian counts (Yin et al., 2015) was tested in low-density US cities. Nothing in this literature confronts dense motorbike traffic, tropical midday light, or hijab silhouettes at once &mdash; the specific combination this pipeline's rider gate and domain-adapted classifier were built to handle.</p>
+      </div>
+      <details class="refs-details">
+        <summary>References</summary>
+        <ol class="refs-list">
+          <li>Redmon, J. &amp; Farhadi, A. (2018). YOLOv3: An incremental improvement. <em>arXiv:1804.02767</em>.</li>
+          <li>Jocher, G., Chaurasia, A. &amp; Qiu, J. (2023). Ultralytics YOLOv8. <em>github.com/ultralytics/ultralytics</em>.</li>
+          <li>Shao, S. et al. (2018). CrowdHuman: A benchmark for detecting human in a crowd. <em>arXiv:1805.00123</em>.</li>
+          <li>Zhang, S. et al. (2017). CityPersons: A diverse dataset for pedestrian detection. <em>CVPR 2017</em>.</li>
+          <li>Yin, L. et al. (2015). 'Big data' for pedestrian volume: Exploring the use of Google Street View images for pedestrian counts. <em>Computers, Environment and Urban Systems</em>.</li>
+          <li>Wang, Y. et al. (2021). Unsupervised domain-adaptive scene-specific pedestrian detection for static video surveillance. <em>Pattern Recognition</em>, 118.</li>
+          <li>Li, X. et al. (2022). Occlusion handling and multi-scale pedestrian detection based on deep learning: A review. <em>IEEE Access</em>.</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <p class="card-eyebrow">Bucket 2</p>
+      <h2>Street view imagery for urban analysis</h2>
+      <div class="prose">
+        <p>Biljecki &amp; Ito's (2021) review of 619 papers maps street-view imagery's use across ten urban analytics domains and identifies deep learning as the field's dominant method &mdash; but flags pedestrian attribute recognition as an underdeveloped use case, with sparse coverage of Global South cities. Gebru et al. (2017) showed demographic attributes could be inferred from 50 million GSV images across US cities; Neuhold et al.'s (2017) Mapillary Vistas dataset, which trains this project's segmentation model, established geographically diverse street-scene segmentation as a research resource. This project sits inside that tradition while filling a specific gap the review identifies: gendered pedestrian presence and streetscape quality measured together, at full-city scale, in a tropical Global South megacity.</p>
+      </div>
+      <details class="refs-details">
+        <summary>References</summary>
+        <ol class="refs-list">
+          <li>Biljecki, F. &amp; Ito, K. (2021). Street view imagery in urban analytics and GIS: A review. <em>Landscape and Urban Planning</em>, 215, 104217.</li>
+          <li>Gebru, T. et al. (2017). Using deep learning and Google Street View to estimate the demographic makeup of neighborhoods across the United States. <em>PNAS</em>, 114(50).</li>
+          <li>Naik, N. et al. (2017). Computer vision uncovers predictors of physical urban change. <em>PNAS</em>, 114(29).</li>
+          <li>Li, X. et al. (2015). Assessing street-level urban greenery using Google Street View and a modified green view index. <em>Urban Forestry &amp; Urban Greening</em>, 14(3).</li>
+          <li>Seiferling, I. et al. (2017). Green streets: Quantifying and mapping urban trees with street-level imagery and computer vision. <em>Landscape and Urban Planning</em>, 165.</li>
+          <li>Neuhold, G. et al. (2017). The Mapillary Vistas dataset for semantic understanding of street scenes. <em>ICCV 2017</em>.</li>
+          <li>Chen, L. et al. (2020). Estimating pedestrian volume using street view images: A large-scale validation test. <em>Computers, Environment and Urban Systems</em>, 81.</li>
+          <li>Yue, H. et al. (2022). Detecting people on the street and the streetscape physical environment from Baidu Street View images. <em>ISPRS International Journal of Geo-Information</em>, 11(3).</li>
+          <li>Chen, L. et al. (2022). Examining the association between the built environment and pedestrian volume using street view images. <em>Cities</em>, 127.</li>
+          <li>Zhang, F. et al. (2024). Urban visual intelligence: Studying cities with artificial intelligence and street-level imagery. <em>Annals of the American Association of Geographers</em>, 114(2).</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <p class="card-eyebrow">Bucket 3</p>
+      <h2>Walkability and pedestrian studies</h2>
+      <div class="prose">
+        <p>Ewing &amp; Cervero's (2010) meta-analysis of ~60 studies is the field's foundational synthesis: walking responds most to land-use diversity, destination density, and connectivity &mdash; the "5Ds" framework. That literature, including Jakarta-specific work (Lo's 2011 walkability dissertation, Sihombing et al.'s 2022 CBD study), predicts pedestrian volume should track physical infrastructure quality fairly closely. That prediction is exactly what this project's r&nbsp;=&nbsp;0.09 result complicates: for female pedestrians specifically, presence turns out to track economic activity far more than street quality, a departure from the built-environment literature's usual expectation worth reading against this backdrop.</p>
+      </div>
+      <details class="refs-details">
+        <summary>References</summary>
+        <ol class="refs-list">
+          <li>Ewing, R. &amp; Cervero, R. (2010). Travel and the built environment: A meta-analysis. <em>Journal of the American Planning Association</em>, 76(3).</li>
+          <li>Southworth, M. (2005). Designing the walkable city. <em>Journal of Urban Planning and Development</em>, 131(4).</li>
+          <li>Zhou, H. et al. (2019). Social inequalities in neighborhood visual walkability. <em>Sustainable Cities and Society</em>, 50.</li>
+          <li>Sihombing, A.V.R. et al. (2022). Walkability and importance assessment of pedestrian facilities on central business district in capital city of Indonesia. <em>Case Studies on Transport Policy</em>, 10(4).</li>
+          <li>Lo, R.S.H. (2011). <em>Walkability Planning in Jakarta</em>. PhD dissertation, UC Berkeley.</li>
+          <li>Pojani, D. &amp; Stead, D. (2015). Sustainable urban transport in the developing world: Beyond megacities. <em>Sustainability</em>, 7(6).</li>
+          <li>van Beurden, E. et al. (2020). Effects of the built environment on physical activity: A systematic review taking sex/gender into account. <em>Environmental Research</em>, 199.</li>
+          <li>Rajaee, M. et al. (2021). Socioeconomic and racial disparities of sidewalk quality in a traditional rust belt city. <em>SSM: Population Health</em>, 16.</li>
+          <li>Yang, C. et al. (2024). The effect of the perceptible built environment on pedestrians' walking behaviours in commercial districts. <em>Environment and Planning B</em>, 51(3).</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <p class="card-eyebrow">Bucket 4</p>
+      <h2>Gender and urban mobility</h2>
+      <div class="prose">
+        <p>Women's public-space presence responds to safety conditions in ways physical infrastructure alone doesn't explain, and is further shaped by the "mobility of care" (Sánchez de Madariaga, 2013) &mdash; the fragmented, multi-stop trip patterns that care work generates, concentrating women's movement near markets, schools, and services rather than commuter corridors. In Indonesia, where the informal sector is roughly 60% of employment (ILO, 2023), women are disproportionately concentrated in market trading &mdash; precisely the dense, mixed-use street activity this project's GPI is built to capture. Read against this literature, the GPI&ndash;SQI orthogonality is neither anomalous nor surprising: it reflects an already-documented pattern, measured here at a scale and spatial resolution the literature hasn't previously had access to.</p>
+      </div>
+      <details class="refs-details">
+        <summary>References</summary>
+        <ol class="refs-list">
+          <li>Uteng, T.P. &amp; Cresswell, T. (eds.) (2008). <em>Gendered Mobilities</em>. Routledge.</li>
+          <li>Loukaitou-Sideris, A. (2016). A gendered view of mobility and transport: Next steps and future directions. <em>Town Planning Review</em>, 87(5).</li>
+          <li>Gauvin, L. et al. (2020). Gender gaps in urban mobility. <em>Humanities and Social Sciences Communications</em>, 7(1).</li>
+          <li>Carpio-Pinedo, J., De Gregorio Hurtado, S. &amp; Sánchez de Madariaga, I. (2019). Gender mainstreaming in urban planning. <em>Planning Theory &amp; Practice</em>, 20(2).</li>
+          <li>Sánchez de Madariaga, I. (2013). Mobility of care: Introducing new concepts in urban transportation. In <em>Fair Shared Cities</em>. Ashgate.</li>
+          <li>Dunckel-Graglia, A. (2013). 'Pink transportation' in Mexico City. <em>Gender &amp; Development</em>, 21(2).</li>
+          <li>Amaral, S. et al. (2025). Sexual harassment in public spaces and police patrols: Experimental evidence from urban India. <em>Quarterly Journal of Economics</em>, 140(4).</li>
+          <li>Buchmann, N., Meyer, C. &amp; Sullivan, C.D. (2024). Paternalistic discrimination. <em>Working Paper</em>, IGC / NBER.</li>
+          <li>ILO (2023). Women and men in the informal economy: A statistical update. International Labour Organization.</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <p class="card-eyebrow">Bucket 5</p>
+      <h2>Domain adaptation in computer vision</h2>
+      <div class="prose">
+        <p>Pan &amp; Yang's (2010) taxonomy frames exactly the setting this pipeline faces: a transductive transfer problem, where source (PA-100K, PETA) and target (Jakarta) share the same task but not the same distribution. The field's dominant unsupervised solutions &mdash; DANN (Ganin et al., 2016), ADDA (Tzeng et al., 2017), CORAL (Sun &amp; Saenko, 2016) &mdash; align feature spaces without labelled target data, but assume the domain gap is modest. GeoNet (Kalluri et al., 2023) shows that assumption strains even across geographies with similar camera setups. Jakarta's gap &mdash; surveillance to panoramic street-level imagery, temperate to tropical light, Western clothing to hijab silhouettes &mdash; is wide enough that this project uses supervised sequential fine-tuning (PA-100K &rarr; PETA &rarr; 8,400+ locally annotated Jakarta crops) rather than unsupervised alignment alone, trading annotation cost for reliability on a target domain the literature's standard tools weren't built for.</p>
+      </div>
+      <details class="refs-details">
+        <summary>References</summary>
+        <ol class="refs-list">
+          <li>Pan, S.J. &amp; Yang, Q. (2010). A survey on transfer learning. <em>IEEE Transactions on Knowledge and Data Engineering</em>, 22(10).</li>
+          <li>Zhuang, F. et al. (2021). A comprehensive survey on transfer learning. <em>Proceedings of the IEEE</em>, 109(1).</li>
+          <li>Ganin, Y. et al. (2016). Domain-adversarial training of neural networks. <em>Journal of Machine Learning Research</em>, 17(59).</li>
+          <li>Tzeng, E., Hoffman, J., Saenko, K. &amp; Darrell, T. (2017). Adversarial discriminative domain adaptation. <em>CVPR 2017</em>.</li>
+          <li>Sun, B. &amp; Saenko, K. (2016). Deep CORAL: Correlation alignment for deep domain adaptation. <em>ECCV 2016 Workshops</em>.</li>
+          <li>Kalluri, T., Xu, W. &amp; Chandraker, M. (2023). GeoNet: Benchmarking unsupervised adaptation across geographies. <em>CVPR 2023</em>.</li>
+          <li>Nguyen, V.D. et al. (2024). Tackling domain shifts in person re-identification: A survey and analysis. <em>CVPR Workshop on Continual Learning in Vision</em>.</li>
+          <li>Alabsi, B.A. et al. (2025). Woman hijab detection using transfer learning. <em>Journal of Information Systems and Digital Technologies</em>, 7(1).</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <p class="footer-affiliation">London School of Economics and Political Science &middot; International Growth Centre</p>
+      <p class="footer-name">Rashmi A. Singh</p>
+    </div>
+    <div>
+      <p class="footer-note">Working research site &mdash; figures and results are provisional and may be revised as data collection and validation continue.</p>
+      <a href="https://github.com/rashmi-a-singh/gsv-jakarta" class="footer-github">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5a10.5 10.5 0 0 0-3.32 20.47c.53.1.72-.23.72-.51v-1.98c-2.94.64-3.56-1.28-3.56-1.28-.48-1.22-1.18-1.55-1.18-1.55-.96-.66.07-.65.07-.65 1.07.08 1.63 1.1 1.63 1.1.94 1.62 2.47 1.15 3.08.88.1-.68.37-1.15.67-1.42-2.35-.27-4.82-1.17-4.82-5.23 0-1.16.41-2.1 1.1-2.84-.11-.27-.48-1.36.1-2.83 0 0 .9-.29 2.95 1.08a10.2 10.2 0 0 1 5.37 0c2.04-1.37 2.94-1.08 2.94-1.08.59 1.47.22 2.56.11 2.83.68.74 1.1 1.68 1.1 2.84 0 4.07-2.48 4.96-4.84 5.22.38.33.72.97.72 1.96v2.9c0 .28.19.62.73.51A10.5 10.5 0 0 0 12 1.5z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

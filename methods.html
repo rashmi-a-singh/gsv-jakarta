@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Methods — GSV-Jakarta</title>
+<meta name="description" content="Sampling strategy, three-stage pedestrian pipeline, segmentation track, and the GPI / SQI / SUI index formulas behind GSV-Jakarta.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">GSV<span>·Jakarta</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="maps.html" class="nav-link">Maps</a>
+      <a href="segmentation.html" class="nav-link">Segmentation</a>
+      <a href="gender.html" class="nav-link">Gender</a>
+      <a href="litreview.html" class="nav-link">Lit review</a>
+      <a href="methods.html" class="nav-link active">Methods</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <p class="eyebrow">Pipeline</p>
+      <h1 class="page-title">Methods</h1>
+      <p class="page-intro">From a hexagonal sampling grid over Jakarta to two parallel computer-vision tracks &mdash; one estimating pedestrian gender presence, one assessing streetscape quality &mdash; feeding three neighbourhood-level indices.</p>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Sampling strategy</h2>
+      <div class="prose">
+        <p>A <strong>50-metre hexagonal grid</strong> was overlaid across DKI Jakarta, excluding the Thousand Islands. Candidate hexagons were selected by stratified random sampling, weighted by distance to the nearest RPTRA park &mdash; ensuring the sample doesn't systematically over- or under-represent areas near public green space.</p>
+        <p>For each selected hexagon, the Google Street View Static API was queried to confirm imagery availability from 2013&ndash;2019 within a 25-metre radius of the hexagon centroid. Roughly half of the hexagons returned no imagery at all. Where imagery existed, one panorama per year was kept &mdash; the one nearest the centroid, when more than one was available &mdash; giving an average of 3.5 panoramas per covered hexagon.</p>
+        <p>Each retained panorama yields six images at headings 0&deg;, 60&deg;, 120&deg;, 180&deg;, 240&deg;, and 300&deg; (640&times;640px, full 360&deg; coverage). Night images (luminance thresholding), interior shots (API panorama-type metadata), and duplicate frames (perceptual hashing) are removed before any model sees the data. Every retained image is assigned to its administrative kelurahan using Badan Informasi Geospasial boundary shapefiles.</p>
+      </div>
+      <div class="stat-inline-row">
+        <div class="stat-inline"><span class="stat-value">242,439</span><span class="stat-label">panoramas retained</span></div>
+        <div class="stat-inline"><span class="stat-value">6</span><span class="stat-label">headings per panorama</span></div>
+        <div class="stat-inline"><span class="stat-value">3.5</span><span class="stat-label">avg. panoramas / hexagon</span></div>
+        <div class="stat-inline"><span class="stat-value">261</span><span class="stat-label">kelurahan assigned</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Pipeline architecture</h2>
+      <div class="prose">
+        <p>Two tracks run on the same image set. The <strong>pedestrian track</strong> is three stages &mdash; detect, gate, classify &mdash; producing the inputs to GPI. The <strong>segmentation track</strong> runs independently on the same panoramas to produce SQI.</p>
+      </div>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 900 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pipeline diagram: a GSV panorama feeds a three-stage pedestrian track ending in GPI, and a segmentation track ending in SQI">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 Z" fill="var(--border-strong)"/>
+            </marker>
+          </defs>
+
+          <text x="210" y="22" class="diagram-label">Pedestrian track</text>
+          <text x="305" y="252" class="diagram-label">Segmentation track</text>
+
+          <rect x="20" y="150" width="130" height="80" rx="8" class="diagram-box"/>
+          <text x="85" y="184" class="diagram-title" text-anchor="middle">GSV panorama</text>
+          <text x="85" y="202" class="diagram-sub" text-anchor="middle">6 headings &middot; 640&#215;640</text>
+
+          <rect x="210" y="40" width="140" height="80" rx="8" class="diagram-box"/>
+          <text x="280" y="70" class="diagram-title" text-anchor="middle">Stage 0 &middot; detect</text>
+          <text x="280" y="88" class="diagram-sub" text-anchor="middle">YOLOv11L, conf 0.25</text>
+          <text x="280" y="102" class="diagram-sub" text-anchor="middle">IoU-excludes vehicles/bikes</text>
+
+          <rect x="400" y="40" width="140" height="80" rx="8" class="diagram-box"/>
+          <text x="470" y="70" class="diagram-title" text-anchor="middle">Stage 1 &middot; gate</text>
+          <text x="470" y="88" class="diagram-sub" text-anchor="middle">EfficientNet-B0</text>
+          <text x="470" y="102" class="diagram-sub" text-anchor="middle">rider / clean / hard-neg</text>
+
+          <rect x="590" y="40" width="155" height="80" rx="8" class="diagram-box"/>
+          <text x="667" y="70" class="diagram-title" text-anchor="middle">Stage 2 &middot; classify</text>
+          <text x="667" y="88" class="diagram-sub" text-anchor="middle">EfficientNet-B3 +</text>
+          <text x="667" y="102" class="diagram-sub" text-anchor="middle">YOLOv11M ensemble</text>
+
+          <rect x="800" y="55" width="80" height="50" rx="8" class="diagram-box-accent"/>
+          <text x="840" y="86" class="diagram-title-accent" text-anchor="middle">GPI</text>
+
+          <rect x="305" y="260" width="155" height="80" rx="8" class="diagram-box"/>
+          <text x="382" y="292" class="diagram-title" text-anchor="middle">Segmentation</text>
+          <text x="382" y="310" class="diagram-sub" text-anchor="middle">YOLOv8x-seg</text>
+          <text x="382" y="324" class="diagram-sub" text-anchor="middle">trained on Mapillary Vistas</text>
+
+          <rect x="800" y="280" width="80" height="50" rx="8" class="diagram-box-accent"/>
+          <text x="840" y="311" class="diagram-title-accent" text-anchor="middle">SQI</text>
+
+          <path class="diagram-arrow" d="M150,172 L204,88" marker-end="url(#arrow)"/>
+          <path class="diagram-arrow" d="M150,208 L299,296" marker-end="url(#arrow)"/>
+          <path class="diagram-arrow" d="M350,80 L394,80" marker-end="url(#arrow)"/>
+          <path class="diagram-arrow" d="M540,80 L584,80" marker-end="url(#arrow)"/>
+          <path class="diagram-arrow" d="M745,80 L794,80" marker-end="url(#arrow)"/>
+          <path class="diagram-arrow" d="M460,300 L794,304" marker-end="url(#arrow)"/>
+        </svg>
+      </div>
+
+      <div class="stage-grid">
+        <div class="stage-card">
+          <p class="card-eyebrow">Stage 0</p>
+          <h3>Detection</h3>
+          <p>Every crop that could be a pedestrian, found before it's judged. Runs inline during download rather than as a second pass.</p>
+          <ul>
+            <li>YOLOv11L, COCO-pretrained</li>
+            <li>Confidence threshold 0.25</li>
+            <li>IoU &gt; 0.3 excludes vehicle occupants</li>
+            <li>IoU &gt; 0.1 excludes bike/motorbike riders</li>
+          </ul>
+          <span class="stage-meta">code_to_download_GSV_images.py</span>
+        </div>
+        <div class="stage-card">
+          <p class="card-eyebrow">Stage 1</p>
+          <h3>Rider gate</h3>
+          <p>Jakarta's pedestrian counts are heavily confounded by motorbike riders unless filtered before classification.</p>
+          <ul>
+            <li>EfficientNet-B0, 3-class softmax</li>
+            <li>Classes: rider / clean / hard-negative</li>
+            <li>Bounding box expanded 15% before crop</li>
+            <li>Only "clean" passes to Stage 2</li>
+          </ul>
+          <span class="stage-meta">photo_scanner_BIG.ipynb</span>
+        </div>
+        <div class="stage-card">
+          <p class="card-eyebrow">Stage 2</p>
+          <h3>Classification</h3>
+          <p>An ensemble of two independently-trained models on the surviving crops, domain-adapted to Jakarta street imagery.</p>
+          <ul>
+            <li>EfficientNet-B3 + YOLOv11M ensemble</li>
+            <li>Classes: adult female / adult male / child</li>
+            <li>"Unknown" is a post-hoc score-based flag, not a trained class</li>
+          </ul>
+          <span class="stage-meta">Feeds GPI directly</span>
+        </div>
+      </div>
+
+      <div class="caveat-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.2" r="0.3" fill="currentColor"/></svg>
+        <span>An earlier project summary described this as a two-stage system with a single 4-class classifier. The gate step (Stage 1) and the ensemble structure of Stage 2 were left out of that description &mdash; this page reflects the pipeline as actually deployed.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Streetscape segmentation</h2>
+      <div class="prose">
+        <p>The segmentation track runs independently of the pedestrian track, on the same panoramas. A YOLOv8x-seg model trained on <strong>Mapillary Vistas</strong> &mdash; chosen for its geographic diversity, including tropical and informal urban settings the more common benchmark datasets lack &mdash; produces per-image pixel ratios across roughly two dozen streetscape categories: sidewalk, curb, crosswalk, road, lane marking, building, wall, fence, street furniture, vegetation, terrain, and more.</p>
+        <p>For the Streetscape Quality Index specifically, this rich output is distilled down to two components: a vegetation ratio and a ground-surface condition score, remapped from the full Mapillary category set. All segmentation inference runs directly on GSV imagery with no additional Jakarta-specific fine-tuning.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Spatial indices</h2>
+      <div class="prose">
+        <p>Three indices are computed per kelurahan from the two tracks above.</p>
+      </div>
+
+      <div class="formula-box">
+        <p class="formula-name">GPI &middot; Gender Presence Index</p>
+        <span class="formula-eq">GPI = 0.35&middot;FPR + 0.35&middot;FCR + 0.15&middot;(1&minus;HHI) + 0.15&middot;CPR</span>
+        <ul class="formula-terms">
+          <li><code>FPR</code>Female Presence Rate &mdash; share of images with a female detection</li>
+          <li><code>FCR</code>Female Count Ratio &mdash; female share of all non-unknown detections</li>
+          <li><code>HHI</code>Herfindahl&ndash;Hirschman concentration of presence across time-of-day &amp; weekday/weekend; (1&minus;HHI) rewards habitual rather than occasional use</li>
+          <li><code>CPR</code>Child Presence Rate &mdash; a proxy for caregiver safety judgement</li>
+        </ul>
+        <p>Weights estimated via PCA against field-observed female pedestrian share at 48 validation sites. Field validation: <strong>r = 0.73</strong> (p &lt; 0.001).</p>
+      </div>
+
+      <div class="formula-box">
+        <p class="formula-name">SQI &middot; Streetscape Quality Index</p>
+        <span class="formula-eq">SQI = 0.5&middot;VR + 0.5&middot;PQS</span>
+        <ul class="formula-terms">
+          <li><code>VR</code>Vegetation Ratio &mdash; mean vegetation pixel share</li>
+          <li><code>PQS</code>Pavement Quality Score &mdash; share of ground-surface pixels in good condition</li>
+        </ul>
+        <p>Validated against 36 expert street audits (Irvine&ndash;Minnesota Inventory protocol): <strong>r = 0.69</strong> (p &lt; 0.001).</p>
+      </div>
+
+      <div class="formula-box">
+        <p class="formula-name">SUI &middot; Spatial Uncertainty Index</p>
+        <span class="formula-eq">SUI = U / (F + M + C + U)</span>
+        <ul class="formula-terms">
+          <li><code>F, M, C, U</code>Counts of female, male, child, and unknown detections in a kelurahan</li>
+        </ul>
+        <p>Rather than discarding low-confidence detections, SUI turns them into an honesty check: kelurahan with SUI &gt; 0.25 are flagged in every downstream economic analysis, so results aren't presented with more confidence than the underlying classifier actually has.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <p class="footer-affiliation">London School of Economics and Political Science &middot; International Growth Centre</p>
+      <p class="footer-name">Rashmi A. Singh</p>
+    </div>
+    <div>
+      <p class="footer-note">Working research site &mdash; figures and results are provisional and may be revised as data collection and validation continue.</p>
+      <a href="https://github.com/rashmi-a-singh/gsv-jakarta" class="footer-github">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5a10.5 10.5 0 0 0-3.32 20.47c.53.1.72-.23.72-.51v-1.98c-2.94.64-3.56-1.28-3.56-1.28-.48-1.22-1.18-1.55-1.18-1.55-.96-.66.07-.65.07-.65 1.07.08 1.63 1.1 1.63 1.1.94 1.62 2.47 1.15 3.08.88.1-.68.37-1.15.67-1.42-2.35-.27-4.82-1.17-4.82-5.23 0-1.16.41-2.1 1.1-2.84-.11-.27-.48-1.36.1-2.83 0 0 .9-.29 2.95 1.08a10.2 10.2 0 0 1 5.37 0c2.04-1.37 2.94-1.08 2.94-1.08.59 1.47.22 2.56.11 2.83.68.74 1.1 1.68 1.1 2.84 0 4.07-2.48 4.96-4.84 5.22.38.33.72.97.72 1.96v2.9c0 .28.19.62.73.51A10.5 10.5 0 0 0 12 1.5z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
