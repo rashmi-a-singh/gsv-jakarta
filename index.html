@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GSV-Jakarta — Mapping Urban Streetscapes and Pedestrian Presence</title>
+<meta name="description" content="Mapping urban streetscapes and pedestrian presence across 242,439 Google Street View panoramas in Jakarta, Indonesia. An LSE / IGC research project.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">GSV<span>·Jakarta</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link active">Home</a>
+      <a href="maps.html" class="nav-link">Maps</a>
+      <a href="segmentation.html" class="nav-link">Segmentation</a>
+      <a href="gender.html" class="nav-link">Gender</a>
+      <a href="litreview.html" class="nav-link">Lit review</a>
+      <a href="methods.html" class="nav-link">Methods</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <h1 class="sr-only">GSV-Jakarta</h1>
+        <p class="eyebrow">DKI Jakarta &middot; 2013&ndash;2019</p>
+        <p class="hero-title" aria-hidden="true">GSV-Jakarta</p>
+        <p class="hero-subtitle">Mapping Urban Streetscapes and Pedestrian Presence Across 242,439 Panoramas</p>
+        <p class="hero-finding">Female pedestrian presence and street quality are spatially independent across Jakarta&rsquo;s 261 kelurahan <span class="hero-finding-stat">(r&nbsp;=&nbsp;0.09)</span></p>
+      </div>
+      <div class="hero-motif" aria-hidden="true">
+        <svg viewBox="0 0 210 226" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="var(--border-strong)" stroke-width="1">
+            <path d="M0,35 L15,9 L45,9 L60,35 L45,61 L15,61 Z"/>
+            <path d="M0,87 L15,61 L45,61 L60,87 L45,113 L15,113 Z"/>
+            <path d="M0,139 L15,113 L45,113 L60,139 L45,165 L15,165 Z"/>
+            <path d="M0,191 L15,165 L45,165 L60,191 L45,217 L15,217 Z"/>
+            <path d="M45,61 L60,35 L90,35 L105,61 L90,87 L60,87 Z"/>
+            <path d="M45,113 L60,87 L90,87 L105,113 L90,139 L60,139 Z"/>
+            <path d="M45,165 L60,139 L90,139 L105,165 L90,191 L60,191 Z"/>
+            <path d="M90,35 L105,9 L135,9 L150,35 L135,61 L105,61 Z"/>
+            <path d="M90,87 L105,61 L135,61 L150,87 L135,113 L105,113 Z"/>
+            <path d="M90,139 L105,113 L135,113 L150,139 L135,165 L105,165 Z"/>
+            <path d="M90,191 L105,165 L135,165 L150,191 L135,217 L105,217 Z"/>
+            <path d="M135,61 L150,35 L180,35 L195,61 L180,87 L150,87 Z"/>
+            <path d="M135,113 L150,87 L180,87 L195,113 L180,139 L150,139 Z"/>
+            <path d="M135,165 L150,139 L180,139 L195,165 L180,191 L150,191 Z"/>
+          </g>
+          <circle cx="30" cy="87" r="4.5" fill="var(--phase-1a)"/>
+          <circle cx="120" cy="35" r="4.5" fill="var(--phase-1b)"/>
+          <circle cx="75" cy="113" r="4.5" fill="var(--phase-2)"/>
+          <circle cx="165" cy="61" r="4.5" fill="var(--phase-3)"/>
+          <circle cx="30" cy="191" r="4.5" fill="var(--phase-2)"/>
+          <circle cx="120" cy="139" r="4.5" fill="var(--phase-1a)"/>
+          <circle cx="165" cy="165" r="4.5" fill="var(--phase-1b)"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-bar">
+    <h2 class="sr-only">Dataset at a glance</h2>
+    <div class="stats-inner">
+      <div class="stat"><span class="stat-value">1,436,461</span><span class="stat-label">images</span></div>
+      <div class="stat"><span class="stat-value">242,439</span><span class="stat-label">panoramas</span></div>
+      <div class="stat"><span class="stat-value">261</span><span class="stat-label">kelurahan</span></div>
+      <div class="stat"><span class="stat-value">4</span><span class="stat-label">collection phases</span></div>
+      <div class="stat"><span class="stat-value">2013&ndash;2019</span><span class="stat-label">capture window</span></div>
+    </div>
+  </section>
+
+  <section class="card-grid-section">
+    <div class="section-intro">
+      <p class="section-label">Project sections</p>
+      <h2 class="section-heading">Explore the project</h2>
+    </div>
+    <div class="card-grid">
+
+      <a href="maps.html" class="card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 21s-7-6.5-7-11.5a7 7 0 0 1 14 0C19 14.5 12 21 12 21z"/>
+          <circle cx="12" cy="9.5" r="2.5"/>
+        </svg>
+        <p class="card-eyebrow">Spatial coverage</p>
+        <h3 class="card-title">Maps</h3>
+        <p class="card-desc">242,439 panoramas across a 50-metre hexagonal sampling grid, month by month and phase by phase, 2013&ndash;2019.</p>
+        <span class="card-arrow">View maps &rarr;</span>
+      </a>
+
+      <a href="segmentation.html" class="card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="12,3 21,8 12,13 3,8"/>
+          <polyline points="3,13 12,18 21,13"/>
+          <polyline points="3,17.5 12,22 21,17.5"/>
+        </svg>
+        <p class="card-eyebrow">Streetscape</p>
+        <h3 class="card-title">Segmentation</h3>
+        <p class="card-desc">Pixel-level classification of vegetation, pavement, and infrastructure across 1.4M+ street-level images.</p>
+        <span class="card-arrow">View results &rarr;</span>
+      </a>
+
+      <a href="gender.html" class="card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="9" cy="7" r="3"/>
+          <path d="M3.5 20c0-3.5 2.5-6 5.5-6s5.5 2.5 5.5 6"/>
+          <circle cx="17" cy="7" r="2.3"/>
+          <path d="M13.8 14.3c2.6.3 4.7 2.5 4.7 5.7"/>
+        </svg>
+        <p class="card-eyebrow">Pedestrian</p>
+        <h3 class="card-title">Gender</h3>
+        <p class="card-desc">The three-stage detection-to-classification pipeline behind the Gender Parity Index.</p>
+        <span class="card-arrow">View model &rarr;</span>
+      </a>
+
+      <a href="litreview.html" class="card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 5.5c2-1 5-1 8 0v14c-3-1-6-1-8 0z"/>
+          <path d="M20 5.5c-2-1-5-1-8 0v14c3-1 6-1 8 0z"/>
+        </svg>
+        <p class="card-eyebrow">Literature</p>
+        <h3 class="card-title">Lit review</h3>
+        <p class="card-desc">Where this project sits against research on gender, mobility, and street-level computer vision.</p>
+        <span class="card-arrow">Read review &rarr;</span>
+      </a>
+
+      <a href="methods.html" class="card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="4.5" cy="12" r="2.2"/>
+          <circle cx="12" cy="5.5" r="2.2"/>
+          <circle cx="12" cy="18.5" r="2.2"/>
+          <circle cx="19.5" cy="12" r="2.2"/>
+          <path d="M6.5 11 10 6.7M6.5 13 10 17.3M14 6.7 17.5 11M14 17.3 17.5 13"/>
+        </svg>
+        <p class="card-eyebrow">Pipeline</p>
+        <h3 class="card-title">Methods</h3>
+        <p class="card-desc">The full architecture &mdash; sampling strategy, detection, segmentation, and the indices built on top.</p>
+        <span class="card-arrow">View pipeline &rarr;</span>
+      </a>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <p class="footer-affiliation">London School of Economics and Political Science &middot; International Growth Centre</p>
+      <p class="footer-name">Rashmi A. Singh</p>
+    </div>
+    <div>
+      <p class="footer-note">Working research site &mdash; figures and results are provisional and may be revised as data collection and validation continue.</p>
+      <a href="https://github.com/rashmi-a-singh/gsv-jakarta" class="footer-github">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5a10.5 10.5 0 0 0-3.32 20.47c.53.1.72-.23.72-.51v-1.98c-2.94.64-3.56-1.28-3.56-1.28-.48-1.22-1.18-1.55-1.18-1.55-.96-.66.07-.65.07-.65 1.07.08 1.63 1.1 1.63 1.1.94 1.62 2.47 1.15 3.08.88.1-.68.37-1.15.67-1.42-2.35-.27-4.82-1.17-4.82-5.23 0-1.16.41-2.1 1.1-2.84-.11-.27-.48-1.36.1-2.83 0 0 .9-.29 2.95 1.08a10.2 10.2 0 0 1 5.37 0c2.04-1.37 2.94-1.08 2.94-1.08.59 1.47.22 2.56.11 2.83.68.74 1.1 1.68 1.1 2.84 0 4.07-2.48 4.96-4.84 5.22.38.33.72.97.72 1.96v2.9c0 .28.19.62.73.51A10.5 10.5 0 0 0 12 1.5z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
