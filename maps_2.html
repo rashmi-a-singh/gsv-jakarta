@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maps — GSV-Jakarta</title>
+<meta name="description" content="242,439 Google Street View panoramas across Jakarta, aggregated by calendar month and color-coded by data collection phase, 2013–2019.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">GSV<span>·Jakarta</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="maps.html" class="nav-link active">Maps</a>
+      <a href="segmentation.html" class="nav-link">Segmentation</a>
+      <a href="gender.html" class="nav-link">Gender</a>
+      <a href="litreview.html" class="nav-link">Lit review</a>
+      <a href="methods.html" class="nav-link">Methods</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <p class="eyebrow">Spatial coverage</p>
+      <h1 class="page-title">Maps</h1>
+      <p class="page-intro">Every one of the 242,439 panoramas, pooled across all years (2013&ndash;2019) and split into twelve calendar-month maps, color-coded by data collection phase. Pooling by month rather than by year shows where the sampling grid was covered densely and where coverage thins out, independent of which year a given panorama happened to be captured. Click any month to view it full-size.</p>
+    </div>
+  </section>
+
+  <section class="gallery-section">
+    <div class="gallery-grid" id="gallery">
+      <button class="gallery-item" data-index="0">
+        <img src="01_january.png" alt="Map of Jakarta GSV panorama coverage in January, phase-coded" loading="lazy">
+        <span class="gallery-caption"><span class="gallery-caption-month">January</span><span class="gallery-caption-n">n=14,394</span></span>
+      </button>
+      <button class="gallery-item" data-index="1">
+        <img src="02_february.png" alt="Map of Jakarta GSV panorama coverage in February, phase-coded" loading="lazy">
+        <span class="gallery-caption"><span class="gallery-caption-month">February</span><span class="gallery-caption-n">n=15,503</span></span>
+      </button>
+      <button class="gallery-item" data-index="2">
+        <img src="03_march.png" alt="Map of Jakarta GSV panorama coverage in March, phase-coded" loading="lazy">
+        <span class="gallery-caption"><span class="gallery-caption-month">March</span><span class="gallery-caption-n">n=40,685</span></span>
+      </button>
+      <button class="gallery-item" data-index="3">
+        <img src="04_april.png" alt="Map of Jakarta GSV panorama coverage in April, phase-coded" loading="lazy">
+        <span class="gallery-caption"><span class="gallery-caption-month">April</span><span class="gallery-caption-n">n=46,921</span></span>
+      </button>
+      <button class="gallery-item" data-index="4">
+        <img src="05_may.png" alt="Map of Jakarta GSV panorama coverage in May, phase-coded" loading="lazy">
+        <span class="gallery-caption"><span class="gallery-caption-month">May</span><span class="gallery-caption-n">n=22,886</span></span>
+      </button>
+      <button class="gallery-item" data-index="5">
+        <img src="06_june.png" alt="Map of Jakarta GSV panorama coverage in June, phase-coded" loading="lazy">
+        <span class="gallery-caption"><span class="gallery-caption-month">June</span><span class="gallery-caption-n">n=22,671</span></span>
+      </button>
+      <button class="gallery-item" data-index="6">
+        <img src="07_july.png" alt="Map of Jakarta GSV panorama coverage in July, phase-coded" loading="lazy">
+        <span class="gallery-caption"><span class="gallery-caption-month">July</span><span class="gallery-caption-n">n=10,815</span></span>
+      </button>
+      <button class="gallery-item" data-index="7">
+        <img src="08_august.png" alt="Map of Jakarta GSV panorama coverage in August, phase-coded" loading="lazy">
+        <span class="gallery-caption"><span class="gallery-caption-month">August</span><span class="gallery-caption-n">n=12,813</span></span>
+      </button>
+      <button class="gallery-item" data-index="8">
+        <img src="09_september.png" alt="Map of Jakarta GSV panorama coverage in September, phase-coded" loading="lazy">
+        <span class="gallery-caption"><span class="gallery-caption-month">September</span><span class="gallery-caption-n">n=12,812</span></span>
+      </button>
+      <button class="gallery-item" data-index="9">
+        <img src="10_october.png" alt="Map of Jakarta GSV panorama coverage in October, phase-coded" loading="lazy">
+        <span class="gallery-caption"><span class="gallery-caption-month">October</span><span class="gallery-caption-n">n=20,169</span></span>
+      </button>
+      <button class="gallery-item" data-index="10">
+        <img src="11_november.png" alt="Map of Jakarta GSV panorama coverage in November, phase-coded" loading="lazy">
+        <span class="gallery-caption"><span class="gallery-caption-month">November</span><span class="gallery-caption-n">n=6,160</span></span>
+      </button>
+      <button class="gallery-item" data-index="11">
+        <img src="12_december.png" alt="Map of Jakarta GSV panorama coverage in December, phase-coded" loading="lazy">
+        <span class="gallery-caption"><span class="gallery-caption-month">December</span><span class="gallery-caption-n">n=13,998</span></span>
+      </button>
+    </div>
+  </section>
+
+  <section class="overview-banner-section">
+    <div class="overview-banner">
+      <div class="overview-banner-text">
+        <p class="card-eyebrow">All months, one frame</p>
+        <h3>Overview contact sheet</h3>
+        <p>All twelve monthly maps composited into a single 4&times;3 grid, for a quick side-by-side comparison of coverage across the year.</p>
+      </div>
+      <img src="overview_contact_sheet.png" alt="Contact sheet of all twelve monthly Jakarta GSV coverage maps" id="overview-img" loading="lazy">
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <p class="footer-affiliation">London School of Economics and Political Science &middot; International Growth Centre</p>
+      <p class="footer-name">Rashmi A. Singh</p>
+    </div>
+    <div>
+      <p class="footer-note">Working research site &mdash; figures and results are provisional and may be revised as data collection and validation continue.</p>
+      <a href="https://github.com/rashmi-a-singh/gsv-jakarta" class="footer-github">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5a10.5 10.5 0 0 0-3.32 20.47c.53.1.72-.23.72-.51v-1.98c-2.94.64-3.56-1.28-3.56-1.28-.48-1.22-1.18-1.55-1.18-1.55-.96-.66.07-.65.07-.65 1.07.08 1.63 1.1 1.63 1.1.94 1.62 2.47 1.15 3.08.88.1-.68.37-1.15.67-1.42-2.35-.27-4.82-1.17-4.82-5.23 0-1.16.41-2.1 1.1-2.84-.11-.27-.48-1.36.1-2.83 0 0 .9-.29 2.95 1.08a10.2 10.2 0 0 1 5.37 0c2.04-1.37 2.94-1.08 2.94-1.08.59 1.47.22 2.56.11 2.83.68.74 1.1 1.68 1.1 2.84 0 4.07-2.48 4.96-4.84 5.22.38.33.72.97.72 1.96v2.9c0 .28.19.62.73.51A10.5 10.5 0 0 0 12 1.5z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Map viewer">
+  <button class="lightbox-close" id="lb-close" aria-label="Close">&times;</button>
+  <button class="lightbox-prev" id="lb-prev" aria-label="Previous month">&larr;</button>
+  <figure class="lightbox-figure">
+    <img id="lb-img" src="" alt="">
+    <figcaption class="lightbox-caption" id="lb-caption"></figcaption>
+  </figure>
+  <button class="lightbox-next" id="lb-next" aria-label="Next month">&rarr;</button>
+</div>
+
+<script>
+(function () {
+  var months = [
+    { file: '01_january.png',   label: 'January',   n: '14,394' },
+    { file: '02_february.png',  label: 'February',  n: '15,503' },
+    { file: '03_march.png',     label: 'March',     n: '40,685' },
+    { file: '04_april.png',     label: 'April',     n: '46,921' },
+    { file: '05_may.png',       label: 'May',       n: '22,886' },
+    { file: '06_june.png',      label: 'June',      n: '22,671' },
+    { file: '07_july.png',      label: 'July',      n: '10,815' },
+    { file: '08_august.png',    label: 'August',    n: '12,813' },
+    { file: '09_september.png', label: 'September', n: '12,812' },
+    { file: '10_october.png',   label: 'October',   n: '20,169' },
+    { file: '11_november.png',  label: 'November',  n: '6,160'  },
+    { file: '12_december.png',  label: 'December',  n: '13,998' }
+  ];
+
+  var lightbox = document.getElementById('lightbox');
+  var lbImg = document.getElementById('lb-img');
+  var lbCaption = document.getElementById('lb-caption');
+  var current = 0;
+
+  function open(index) {
+    current = index;
+    render();
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function close() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function render() {
+    var m = months[current];
+    lbImg.src = m.file;
+    lbImg.alt = 'Map of Jakarta GSV panorama coverage in ' + m.label;
+    lbCaption.textContent = m.label + ' \u00b7 n=' + m.n + ' \u00b7 2013\u20132019';
+  }
+
+  function next() { current = (current + 1) % months.length; render(); }
+  function prev() { current = (current - 1 + months.length) % months.length; render(); }
+
+  document.getElementById('gallery').addEventListener('click', function (e) {
+    var item = e.target.closest('.gallery-item');
+    if (item) open(parseInt(item.getAttribute('data-index'), 10));
+  });
+
+  document.getElementById('lb-close').addEventListener('click', close);
+  document.getElementById('lb-next').addEventListener('click', next);
+  document.getElementById('lb-prev').addEventListener('click', prev);
+
+  lightbox.addEventListener('click', function (e) {
+    if (e.target === lightbox) close();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight') next();
+    if (e.key === 'ArrowLeft') prev();
+  });
+
+  document.getElementById('overview-img').addEventListener('click', function () {
+    window.open('overview_contact_sheet.png', '_blank');
+  });
+})();
+</script>
+
+</body>
+</html>
