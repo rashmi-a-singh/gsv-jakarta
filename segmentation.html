@@ -22,6 +22,7 @@
       <a href="gender.html" class="nav-link">Gender</a>
       <a href="litreview.html" class="nav-link">Lit review</a>
       <a href="methods.html" class="nav-link">Methods</a>
+      <a href="explore.html" class="nav-link">Explore</a>
     </div>
   </nav>
 </header>
@@ -44,7 +45,7 @@
         <p>A second, unrelated issue briefly inflated Phase 3's missing-<code>pano_month</code> count: roughly 6,700 Phase 3 <code>pano_id</code>s carried a trailing date suffix that failed to match the panoid universe file during the join. Stripping the suffix recovered nearly all of them, bringing Phase 3's missing-month rate down to under 1%.</p>
       </div>
       <div class="figure-card">
-        <img src="fig7_data_quality_panel.png" alt="Three-panel data quality chart: rows per phase, fully-blank segmentation rows by phase, and missing pano_month by phase">
+        <img src="assets/segmentation/fig7_data_quality_panel.png" alt="Three-panel data quality chart: rows per phase, fully-blank segmentation rows by phase, and missing pano_month by phase">
         <div class="figure-caption">
           <span class="figure-caption-text">All four phases now sit within 0.06&ndash;0.08% fully-blank rows. ~19k images (2.6% of the file) appear under two phase labels &mdash; a known structural duplicate, not an error.</span>
           <span class="figure-caption-tag">n = 1,436,461</span>
@@ -60,14 +61,14 @@
         <p>Pooled across all phases and de-duplicated to 1,417,485 unique images, vegetation, road, and building surfaces dominate the frame &mdash; together accounting for roughly three-fifths of average pixel coverage. Pedestrian infrastructure specifically (sidewalk, curb, crosswalk) is a comparatively small share, consistent with a street network built primarily around vehicle and motorbike traffic rather than pedestrians.</p>
       </div>
       <div class="figure-card">
-        <img src="fig1_class_distribution.png" alt="Horizontal bar chart of segmentation class distribution pooled across all phases, ranked from vegetation at 21.34% down to near-zero classes">
+        <img src="assets/segmentation/fig1_class_distribution.png" alt="Horizontal bar chart of segmentation class distribution pooled across all phases, ranked from vegetation at 21.34% down to near-zero classes">
         <div class="figure-caption">
           <span class="figure-caption-text">Vegetation (21.3%), road (19.3%), and building (18.7%) lead; pedestrian-specific infrastructure (sidewalk, curb, crosswalk) sits well under 5% combined.</span>
           <span class="figure-caption-tag">n = 1,417,485</span>
         </div>
       </div>
       <div class="figure-card">
-        <img src="fig2_phase_comparison.png" alt="Bar chart comparing mean pixel-area share across the four data collection phases for eight streetscape classes">
+        <img src="assets/segmentation/fig2_phase_comparison.png" alt="Bar chart comparing mean pixel-area share across the four data collection phases for eight streetscape classes">
         <div class="figure-caption">
           <span class="figure-caption-text">The same eight core classes held up separately by phase &mdash; the comparison this page's data-quality section validates.</span>
           <span class="figure-caption-tag">Phases 1a &middot; 1b &middot; 2 &middot; 3</span>
@@ -83,14 +84,14 @@
         <p>Two different questions get asked of this data: does a class appear in an image at all (<strong>presence rate</strong>), and how much of the frame does it fill when it does (<strong>conditional size</strong>, shown above). The two can diverge &mdash; a class can be present almost everywhere while still covering a small share of any single frame &mdash; so both are reported rather than collapsed into one number.</p>
       </div>
       <div class="figure-card">
-        <img src="fig5_infrastructure_presence.png" alt="Bar chart of infrastructure presence rate by phase for sidewalk, crosswalk, vegetation, and building classes">
+        <img src="assets/segmentation/fig5_infrastructure_presence.png" alt="Bar chart of infrastructure presence rate by phase for sidewalk, crosswalk, vegetation, and building classes">
         <div class="figure-caption">
           <span class="figure-caption-text">Vegetation appears in 96% of images across every phase; crosswalk in roughly 1%. Presence rates track within a point or two across all four phases.</span>
           <span class="figure-caption-tag">share of images, ratio &gt; 0</span>
         </div>
       </div>
       <div class="figure-card">
-        <img src="fig3_distribution_spread.png" alt="Box plots of pixel-area share distribution by phase for eight streetscape classes, showing median and interquartile range">
+        <img src="assets/segmentation/fig3_distribution_spread.png" alt="Box plots of pixel-area share distribution by phase for eight streetscape classes, showing median and interquartile range">
         <div class="figure-caption">
           <span class="figure-caption-text">Medians and interquartile ranges overlap closely across all four phases for every class shown.</span>
           <span class="figure-caption-tag">box = IQR, line = median</span>
@@ -106,7 +107,7 @@
         <p>Pooling by year rather than by phase shows how coverage has shifted since 2013. Vegetation and building both show a visible step up from 2018 onward across every phase's line &mdash; consistent with Jakarta's built-up density increasing over the capture window, and with all four phases responding to the same underlying city rather than to phase-specific processing artifacts.</p>
       </div>
       <div class="figure-card">
-        <img src="fig4_year_over_year.png" alt="Eight line-chart panels showing year-over-year trends from 2013 to 2019 for vegetation, building, road, sidewalk, crosswalk, curb, wall, and lane marking, split by phase">
+        <img src="assets/segmentation/fig4_year_over_year.png" alt="Eight line-chart panels showing year-over-year trends from 2013 to 2019 for vegetation, building, road, sidewalk, crosswalk, curb, wall, and lane marking, split by phase">
         <div class="figure-caption">
           <span class="figure-caption-text">All four phase lines move together year to year within each class &mdash; the clearest single check that Phase 3 now behaves like the rest of the dataset.</span>
           <span class="figure-caption-tag">2013&ndash;2019</span>
@@ -122,7 +123,7 @@
         <p>Correlating class ratios across images surfaces one relationship well above the noise floor: building and vegetation are strongly negatively correlated (r &asymp; &minus;0.6 to &minus;0.7) &mdash; denser, more built-up frames systematically show less greenery. Almost everything else sits close to zero, meaning most streetscape classes vary largely independently of one another across the dataset.</p>
       </div>
       <div class="figure-card">
-        <img src="fig6_cooccurrence_heatmap.png" alt="Correlation heatmap of segmentation class co-occurrence across all images, with building and vegetation showing a strong negative correlation">
+        <img src="assets/segmentation/fig6_cooccurrence_heatmap.png" alt="Correlation heatmap of segmentation class co-occurrence across all images, with building and vegetation showing a strong negative correlation">
         <div class="figure-caption">
           <span class="figure-caption-text">Building&ndash;vegetation is the standout relationship; nearly every other class pair sits within &plusmn;0.25.</span>
           <span class="figure-caption-tag">Pearson r &middot; n = 1,417,485</span>
