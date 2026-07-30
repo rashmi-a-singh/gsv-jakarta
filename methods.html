@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Methods — GSV-Jakarta</title>
-<meta name="description" content="Sampling strategy, three-stage pedestrian pipeline, segmentation track, and the GPI / SQI / SUI index formulas behind GSV-Jakarta.">
+<meta name="description" content="How JakartaGSV-1M measures who is on the street: hexagonal sampling, a five-stage detection-to-calibration pipeline, and the mathematics behind the classification threshold.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -22,6 +22,7 @@
       <a href="gender.html" class="nav-link">Gender</a>
       <a href="litreview.html" class="nav-link">Lit review</a>
       <a href="methods.html" class="nav-link active">Methods</a>
+      <a href="explore.html" class="nav-link">Explore</a>
     </div>
   </nav>
 </header>
@@ -32,125 +33,139 @@
     <div class="page-hero-inner">
       <p class="eyebrow">Pipeline</p>
       <h1 class="page-title">Methods</h1>
-      <p class="page-intro">From a hexagonal sampling grid over Jakarta to two parallel computer-vision tracks &mdash; one estimating pedestrian gender presence, one assessing streetscape quality &mdash; feeding three neighbourhood-level indices.</p>
+      <p class="page-intro">How JakartaGSV-1M measures who is on the street: a 50-metre hexagonal sampling grid, a five-stage detect&rarr;gate&rarr;score&rarr;calibrate pipeline for pedestrian gender presence, and a parallel segmentation track for streetscape quality.</p>
     </div>
   </section>
 
   <section class="content-section">
     <div class="content-inner">
-      <h2>Sampling strategy</h2>
+      <h2>Sampling: the hexagonal grid</h2>
       <div class="prose">
-        <p>A <strong>50-metre hexagonal grid</strong> was overlaid across DKI Jakarta, excluding the Thousand Islands. Candidate hexagons were selected by stratified random sampling, weighted by distance to the nearest RPTRA park &mdash; ensuring the sample doesn't systematically over- or under-represent areas near public green space.</p>
-        <p>For each selected hexagon, the Google Street View Static API was queried to confirm imagery availability from 2013&ndash;2019 within a 25-metre radius of the hexagon centroid. Roughly half of the hexagons returned no imagery at all. Where imagery existed, one panorama per year was kept &mdash; the one nearest the centroid, when more than one was available &mdash; giving an average of 3.5 panoramas per covered hexagon.</p>
-        <p>Each retained panorama yields six images at headings 0&deg;, 60&deg;, 120&deg;, 180&deg;, 240&deg;, and 300&deg; (640&times;640px, full 360&deg; coverage). Night images (luminance thresholding), interior shots (API panorama-type metadata), and duplicate frames (perceptual hashing) are removed before any model sees the data. Every retained image is assigned to its administrative kelurahan using Badan Informasi Geospasial boundary shapefiles.</p>
+        <p>Jakarta's road network is dense in the center and sparse at the periphery &mdash; sampling along roads alone would over-represent arterial corridors. Instead, the city is tiled with a <strong>50-metre hexagonal grid</strong>, querying the nearest available GSV panorama to each hexagon centroid. Hexagons give uniform nearest-neighbour distances in every direction (unlike squares, which distort along diagonals), giving alleys, kampung interiors, and riverside paths the same chance of representation as arterial roads. Every retained record carries a <code>centroid_cell_id</code>, the spatial join key for every downstream analysis.</p>
       </div>
       <div class="stat-inline-row">
-        <div class="stat-inline"><span class="stat-value">242,439</span><span class="stat-label">panoramas retained</span></div>
-        <div class="stat-inline"><span class="stat-value">6</span><span class="stat-label">headings per panorama</span></div>
-        <div class="stat-inline"><span class="stat-value">3.5</span><span class="stat-label">avg. panoramas / hexagon</span></div>
-        <div class="stat-inline"><span class="stat-value">261</span><span class="stat-label">kelurahan assigned</span></div>
+        <div class="stat-inline"><span class="stat-value">~1.58M</span><span class="stat-label">image records</span></div>
+        <div class="stat-inline"><span class="stat-value">241,422</span><span class="stat-label">panoramas</span></div>
+        <div class="stat-inline"><span class="stat-value">261</span><span class="stat-label">kelurahan covered</span></div>
+        <div class="stat-inline"><span class="stat-value">50m</span><span class="stat-label">hexagon width</span></div>
       </div>
     </div>
   </section>
 
   <section class="content-section">
     <div class="content-inner">
-      <h2>Pipeline architecture</h2>
+      <h2>Why a staged pipeline, not one end-to-end model</h2>
       <div class="prose">
-        <p>Two tracks run on the same image set. The <strong>pedestrian track</strong> is three stages &mdash; detect, gate, classify &mdash; producing the inputs to GPI. The <strong>segmentation track</strong> runs independently on the same panoramas to produce SQI.</p>
+        <p>Classifying pedestrian gender from street-level imagery is really <strong>three different problems wearing one coat</strong>: finding people in cluttered, occluded scenes; excluding motorcycle and bicycle riders &mdash; a problem specific to a motorcycle-dominant streetscape; and estimating gender from body shape and posture alone, since Google blurs every face. Each sub-problem needs different visual features and has a different amount of training data available, so each stage is trained, validated, and repaired independently &mdash; when a bug is found in one stage, only that stage re-runs, not the full 1.58M-image inference.</p>
+        <p>One design principle runs through every stage: <strong>store raw signals, apply thresholds as late as possible.</strong> Keypoint counts, sigmoid scores, and softmax vectors are all persisted at inference time; every decision threshold is applied afterward, on the stored table &mdash; so the entire calibration can be revisited without a single GPU-hour of re-inference.</p>
       </div>
-
-      <div class="diagram-wrap">
-        <svg viewBox="0 0 900 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pipeline diagram: a GSV panorama feeds a three-stage pedestrian track ending in GPI, and a segmentation track ending in SQI">
-          <defs>
-            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 Z" fill="var(--border-strong)"/>
-            </marker>
-          </defs>
-
-          <text x="210" y="22" class="diagram-label">Pedestrian track</text>
-          <text x="305" y="252" class="diagram-label">Segmentation track</text>
-
-          <rect x="20" y="150" width="130" height="80" rx="8" class="diagram-box"/>
-          <text x="85" y="184" class="diagram-title" text-anchor="middle">GSV panorama</text>
-          <text x="85" y="202" class="diagram-sub" text-anchor="middle">6 headings &middot; 640&#215;640</text>
-
-          <rect x="210" y="40" width="140" height="80" rx="8" class="diagram-box"/>
-          <text x="280" y="70" class="diagram-title" text-anchor="middle">Stage 0 &middot; detect</text>
-          <text x="280" y="88" class="diagram-sub" text-anchor="middle">YOLOv11L, conf 0.25</text>
-          <text x="280" y="102" class="diagram-sub" text-anchor="middle">IoU-excludes vehicles/bikes</text>
-
-          <rect x="400" y="40" width="140" height="80" rx="8" class="diagram-box"/>
-          <text x="470" y="70" class="diagram-title" text-anchor="middle">Stage 1 &middot; gate</text>
-          <text x="470" y="88" class="diagram-sub" text-anchor="middle">EfficientNet-B0</text>
-          <text x="470" y="102" class="diagram-sub" text-anchor="middle">rider / clean / hard-neg</text>
-
-          <rect x="590" y="40" width="155" height="80" rx="8" class="diagram-box"/>
-          <text x="667" y="70" class="diagram-title" text-anchor="middle">Stage 2 &middot; classify</text>
-          <text x="667" y="88" class="diagram-sub" text-anchor="middle">EfficientNet-B3 +</text>
-          <text x="667" y="102" class="diagram-sub" text-anchor="middle">YOLOv11M ensemble</text>
-
-          <rect x="800" y="55" width="80" height="50" rx="8" class="diagram-box-accent"/>
-          <text x="840" y="86" class="diagram-title-accent" text-anchor="middle">GPI</text>
-
-          <rect x="305" y="260" width="155" height="80" rx="8" class="diagram-box"/>
-          <text x="382" y="292" class="diagram-title" text-anchor="middle">Segmentation</text>
-          <text x="382" y="310" class="diagram-sub" text-anchor="middle">YOLOv8x-seg</text>
-          <text x="382" y="324" class="diagram-sub" text-anchor="middle">trained on Mapillary Vistas</text>
-
-          <rect x="800" y="280" width="80" height="50" rx="8" class="diagram-box-accent"/>
-          <text x="840" y="311" class="diagram-title-accent" text-anchor="middle">SQI</text>
-
-          <path class="diagram-arrow" d="M150,172 L204,88" marker-end="url(#arrow)"/>
-          <path class="diagram-arrow" d="M150,208 L299,296" marker-end="url(#arrow)"/>
-          <path class="diagram-arrow" d="M350,80 L394,80" marker-end="url(#arrow)"/>
-          <path class="diagram-arrow" d="M540,80 L584,80" marker-end="url(#arrow)"/>
-          <path class="diagram-arrow" d="M745,80 L794,80" marker-end="url(#arrow)"/>
-          <path class="diagram-arrow" d="M460,300 L794,304" marker-end="url(#arrow)"/>
-        </svg>
+      <div class="figure-card">
+        <img src="assets/methods/fig1_pipeline_overview.png" alt="JakartaGSV-1M staged inference pipeline: GSV imagery through Stage 0 detection, Stage 1 rider and pose gates, Stage 2 attribute scoring, and calibrated label assignment, feeding GPI and SBI">
+        <div class="figure-caption">
+          <span class="figure-caption-text">Five stages, two research outputs. Every excluded category (riders, low-quality crops, unknowns) is tracked, not discarded silently.</span>
+        </div>
       </div>
+    </div>
+  </section>
 
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Stage 0 &middot; maximum-recall person detection</h2>
+      <div class="prose">
+        <p><strong>YOLO11x</strong>, a large pretrained detector, runs on every panorama tile, deliberately configured for recall over precision &mdash; confidence 0.22, NMS IoU 0.30. The cost is asymmetric: a false positive (a mannequin, a shadow) is cheap, since later gates remove it. A false negative &mdash; a missed pedestrian &mdash; is unrecoverable and biases the count directly. The same pass also records motorcycle and bicycle boxes, not as analysis targets but as fuel for the Stage 1 geometric rider check.</p>
+        <p><strong>A custom detector was tried first and lost.</strong> A model fine-tuned on CrowdHuman and WiderPerson reached only 0.635 recall on Jakarta validation imagery, against an 0.88 target. The pretrained YOLO11x in a high-recall configuration outperformed it &mdash; reported here plainly, since for city-scale counting a well-configured general-purpose detector beat a bespoke one, and the engineering effort went to the stages where domain adaptation genuinely mattered.</p>
+      </div>
+      <div class="figure-card">
+        <img src="assets/methods/fig2_stage0_detection.png" alt="Stage 0 diagram: YOLO11x person detection at confidence 0.22, IoU 0.30, outputting person boxes and vehicle boxes">
+        <div class="figure-caption">
+          <span class="figure-caption-text">Person and vehicle boxes come from the same detection pass &mdash; vehicle boxes feed Stage 1's geometric gate.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Stage 1 &middot; the dual rider gate, then a pose quality gate</h2>
+      <div class="prose">
+        <p>Jakarta is a motorcycle city: roughly <strong>65% of detected persons are riders</strong>, and riders are <em>systematically</em> misread as female pedestrians &mdash; a seated posture and occluded lower body mimic the visual statistics of women in standard attribute datasets. Left unfiltered, riders wouldn't add random noise to GPI; they'd add directional bias.</p>
+        <p>Two gates run on every crop, and a crop flagged by <strong>either</strong> is excluded: a <strong>geometric gate</strong> intersecting the person box against Stage 0's motorcycle/bicycle boxes, and a <strong>learned gate</strong> &mdash; an EfficientNet-B0 binary classifier trained on ~10,000 curated Jakarta crops (sigmoid threshold 0.20, balanced accuracy 0.941) that catches riders whose vehicle the detector missed. The two fail differently &mdash; geometry misses hidden vehicles, the classifier misses unusual poses &mdash; so their union catches more than either alone. Rider rates converged at ~65% consistently across all four collection phases after repair, which is exactly the cross-phase stability expected if the gate is measuring the city rather than measuring artifacts.</p>
+        <p>Surviving crops pass a lightweight <strong>YOLO11n-pose</strong> quality gate: fewer than 3 visible keypoints (severe occlusion, edge truncation, non-human false positives) and the crop is excluded before any gender scoring runs. Following the raw-signals principle, the keypoint counts themselves are stored rather than a pass/fail flag, so the threshold can be revisited without re-running pose inference at scale.</p>
+      </div>
+      <div class="figure-card">
+        <img src="assets/methods/fig3_stage1_rider_gate.png" alt="Stage 1 dual rider gate diagram: geometric IoU gate and EfficientNet-B0 learned gate, OR-combined, splitting riders from pedestrians">
+        <div class="figure-caption">
+          <span class="figure-caption-text">Either gate flagging a crop is enough to exclude it &mdash; the two failure modes don't overlap much, so the union matters.</span>
+        </div>
+      </div>
       <div class="stage-grid">
         <div class="stage-card">
-          <p class="card-eyebrow">Stage 0</p>
-          <h3>Detection</h3>
-          <p>Every crop that could be a pedestrian, found before it's judged. Runs inline during download rather than as a second pass.</p>
-          <ul>
-            <li>YOLOv11L, COCO-pretrained</li>
-            <li>Confidence threshold 0.25</li>
-            <li>IoU &gt; 0.3 excludes vehicle occupants</li>
-            <li>IoU &gt; 0.1 excludes bike/motorbike riders</li>
-          </ul>
-          <span class="stage-meta">code_to_download_GSV_images.py</span>
+          <p class="card-eyebrow">Exclusion 1 of 3</p>
+          <h3>low_conf</h3>
+          <p>Stage 0 detection confidence itself was low &mdash; uncertain whether there's a person there at all. About detection, not gender.</p>
         </div>
         <div class="stage-card">
-          <p class="card-eyebrow">Stage 1</p>
-          <h3>Rider gate</h3>
-          <p>Jakarta's pedestrian counts are heavily confounded by motorbike riders unless filtered before classification.</p>
-          <ul>
-            <li>EfficientNet-B0, 3-class softmax</li>
-            <li>Classes: rider / clean / hard-negative</li>
-            <li>Bounding box expanded 15% before crop</li>
-            <li>Only "clean" passes to Stage 2</li>
-          </ul>
-          <span class="stage-meta">photo_scanner_BIG.ipynb</span>
+          <p class="card-eyebrow">Exclusion 2 of 3</p>
+          <h3>bad_quality</h3>
+          <p>Failed the pose/quality gate (blur, exposure, severe occlusion) before gender classification was attempted at all.</p>
         </div>
         <div class="stage-card">
-          <p class="card-eyebrow">Stage 2</p>
-          <h3>Classification</h3>
-          <p>An ensemble of two independently-trained models on the surviving crops, domain-adapted to Jakarta street imagery.</p>
-          <ul>
-            <li>EfficientNet-B3 + YOLOv11M ensemble</li>
-            <li>Classes: adult female / adult male / child</li>
-            <li>"Unknown" is a post-hoc score-based flag, not a trained class</li>
-          </ul>
-          <span class="stage-meta">Feeds GPI directly</span>
+          <p class="card-eyebrow">Exclusion 3 of 3</p>
+          <h3>unknown</h3>
+          <p>Detection and quality both passed fine &mdash; the gender classifier's own confidence landed in the gated uncertain zone.</p>
         </div>
       </div>
-
       <div class="caveat-note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.2" r="0.3" fill="currentColor"/></svg>
-        <span>An earlier project summary described this as a two-stage system with a single 4-class classifier. The gate step (Stage 1) and the ensemble structure of Stage 2 were left out of that description &mdash; this page reflects the pipeline as actually deployed.</span>
+        <span>These three labels sit at three different pipeline stages &mdash; detection confidence, then image quality, then gender confidence, in that order &mdash; and are easy to conflate. Only <code>unknown</code> rows carry a meaningful gender probability; <code>low_conf</code> and <code>bad_quality</code> rows are excluded before scoring runs.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Stage 2 &middot; two models, two jobs</h2>
+      <div class="prose">
+        <p>Gender estimation uses two architecturally different models &mdash; not because two is better than one, but because each is demonstrably good at a different sub-task and demonstrably bad at the other's. <strong>EfficientNet-B3</strong> is a multihead model: a shared backbone with a gender head (<code>eff_w</code>, probability female) and a child head (<code>eff_c</code>), trained through a curriculum from large public attribute benchmarks (PA-100K, PETA &mdash; face-blurred before training, to match GSV's own blurring) down to Jakarta-domain crops. <strong>YOLO11m-cls</strong> is a separate 3-way softmax (<code>yolo_w</code>, <code>yolo_m</code>, <code>yolo_c</code>) trained on the same Jakarta crops.</p>
+        <p>The division of labour is deliberate, not assumed: for continuous gender scoring, <strong>EfficientNet wins decisively</strong> &mdash; YOLO11m-cls alone is barely above chance for female-vs-male (ROC-AUC &asymp; 0.535), so every continuous score in the released data comes from the EfficientNet head alone. For the child gate, <strong>YOLO wins</strong> &mdash; the EfficientNet child head fires too broadly on small adults and seated figures, so children are labelled only by YOLO dominance (<code>yolo_c &ge; 0.60</code> and the maximum of the three softmax outputs). For the <em>discrete</em> label decision, the two models' averaged score helps, because their errors are largely independent &mdash; EfficientNet errs on unusual body proportions, YOLO errs near vehicles and clutter &mdash; and averaging lets uncorrelated mistakes partially cancel right at the threshold boundary, exactly where labels flip.</p>
+      </div>
+      <div class="figure-card">
+        <img src="assets/methods/fig4_stage2_ensemble.png" alt="Stage 2 dual-model attribute scoring diagram: EfficientNet-B3 multihead and YOLO11m-cls producing continuous scores and a child gate">
+        <div class="figure-caption">
+          <span class="figure-caption-text">EFF drives continuous scores, YOLO drives the child gate, the mean drives only the discrete label &mdash; three different jobs, not one ensemble average doing everything.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Calibrated label assignment</h2>
+      <div class="prose">
+        <p>Raw sigmoid scores aren't probabilities you can threshold at 0.5 &mdash; training-set class balance, domain shift, and face-blurring all move the true operating point. The pipeline anchors instead to <strong>field observation</strong>: manual street counts across Jakarta established a city-wide ratio of approximately 4.18 men per woman. A single global threshold, <strong>&tau; = 0.6275</strong>, is applied to the ensemble score city-wide, chosen so the pipeline's aggregate output matches that field ratio (achieved: 4.199:1). Per-phase or per-district thresholds were explicitly rejected &mdash; letting the threshold vary by stratum would let calibration silently absorb exactly the spatial variation GPI is meant to measure. One city, one threshold.</p>
+        <p>Crops in a genuinely ambiguous band &mdash; where both models sit in their uncertain mid-range &mdash; are labelled <strong>unknown</strong> (~12.1% of pedestrian rows) rather than forced into a class. Abstention is reported, not hidden.</p>
+      </div>
+      <div class="figure-card">
+        <img src="assets/methods/fig5_label_assignment.png" alt="Calibrated label assignment decision tree: child gate, unknown gate, female threshold at tau=0.6275, else male">
+        <div class="figure-caption">
+          <span class="figure-caption-text">Child gate first, then the unknown band, then the field-calibrated female threshold &mdash; in that order.</span>
+        </div>
+      </div>
+      <div class="formula-box">
+        <p class="formula-name">Why prevalence-matching, specifically</p>
+        <p>Fitting &tau; to a target ratio and then citing that ratio as evidence of accuracy would be circular, so calibration and validation are kept strictly separate. <strong>Calibration</strong> uses only the single city-wide aggregate ratio. <strong>Validation</strong> uses independent evidence: pedestrian counts at held-out field sites never used for calibration, crop-level accuracy on a panoid-disjoint test set, and preservation of the spatial <em>ordering</em> of gender presence across kelurahan.</p>
+        <p>The estimator has a property worth stating plainly: because it matches score <em>rank</em> to a target prevalence rather than thresholding a raw probability, it is invariant to any monotone recalibration of the underlying scores (Platt scaling, temperature scaling, or any other strictly increasing transform yields identical labels). That matters because deep network sigmoid outputs are notoriously miscalibrated as true probabilities, and face-blurring makes any calibration assumption more fragile still &mdash; the method sidesteps the problem rather than assuming it away. The one thing the method does require &mdash; score <em>ranking</em> quality &mdash; is exactly what's validated independently via AUC on the held-out test set.</p>
+        <p>Two further checks accompany the point estimate: a cluster bootstrap confidence interval (resampling whole panoramas, not individual rows, since pedestrians in the same scene are correlated), and a spatial-ordering sensitivity check &mdash; perturbing &tau; across a band and confirming the Spearman rank correlation of kelurahan-level GPI stays flat. The map, not the scalar, is the finding.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Data integrity</h2>
+      <div class="prose">
+        <p>Two pipeline bugs were found, repaired, and are reported openly rather than quietly patched: a missing per-box index that scrambled score-to-person assignment in multi-person images, and a filename-collision bug that cropped roughly 150,000 images from the wrong source files in one collection phase. Post-repair verification confirmed 0.0% duplicated coordinates and scores across all phases.</p>
+        <p>One finding from that repair is worth treating as a result in its own right: <strong>an apparent demographic difference in one phase vanished entirely once the bug was fixed</strong> &mdash; all four phases now agree on the naive male:female ratio to within 0.02. What looked like a signal was an artifact, and catching that is exactly what the repaired, re-verified pipeline is for.</p>
       </div>
     </div>
   </section>
