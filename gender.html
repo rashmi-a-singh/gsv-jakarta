@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gender — GSV-Jakarta</title>
-<meta name="description" content="Pedestrian gender classification results across 1.3M+ detections: ensemble validation, label distribution by phase, the unknown class, and data completeness checks.">
+<meta name="description" content="Pedestrian gender classification: a five-stage detect-gate-score-calibrate pipeline, its confusion-matrix validation, and the audited error modes behind the Gender Presence Index.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -22,6 +22,7 @@
       <a href="gender.html" class="nav-link active">Gender</a>
       <a href="litreview.html" class="nav-link">Lit review</a>
       <a href="methods.html" class="nav-link">Methods</a>
+      <a href="explore.html" class="nav-link">Explore</a>
     </div>
   </nav>
 </header>
@@ -32,79 +33,65 @@
     <div class="page-hero-inner">
       <p class="eyebrow">Pedestrian</p>
       <h1 class="page-title">Gender</h1>
-      <p class="page-intro">1,307,236 pedestrian detections, gated down to 521,519 non-rider crops, classified into female / male / child by an EfficientNet-B3 + YOLOv11M ensemble &mdash; the inputs behind GPI.</p>
+      <p class="page-intro">A five-stage pipeline &mdash; detect, gate for riders, gate for quality, score with two models, calibrate against field observation &mdash; turning street-level imagery into the inputs behind the Gender Presence Index. See <a href="methods.html">Methods</a> for the full architecture; this page covers how well it performs and what it gets wrong.</p>
     </div>
   </section>
 
   <section class="content-section">
     <div class="content-inner">
-      <h2>Why an ensemble</h2>
+      <h2>Why two models, not one</h2>
       <div class="prose">
-        <p>On a balanced 20-crop-per-class manual review, neither model alone is close to reliable on its own for distinguishing female from male: EfficientNet-B3 misreads female crops as male 47.3% of the time, and male crops as female 42.4% of the time &mdash; not far off a coin flip. YOLO11m-cls is worse on the same axis (58.5% and 49.1%). Both models are individually much stronger on the child class (92.4% and 68.5% correctly classified).</p>
-        <p>Averaging the two models' outputs rather than picking one resolves most of this: ensemble accuracy climbs to 76.8% for female, 62.3% for male, and 94.0% for child &mdash; the single biggest lever in the whole pipeline for pedestrian classification quality.</p>
-      </div>
-      <div class="figure-card">
-        <img src="confusion_matrices_3model.png" alt="Three confusion matrices comparing EfficientNet-B3, YOLO11m-cls, and the ensemble, row-normalised percentages, on a 20-crop balanced review">
-        <div class="figure-caption">
-          <span class="figure-caption-text">Row-normalised percentages on a manually balanced 20-crop-per-class review. Diagonal = correct classification.</span>
-          <span class="figure-caption-tag">n=20/class</span>
-        </div>
-      </div>
-      <div class="figure-card">
-        <img src="per_class_metrics.png" alt="Bar chart of recall, precision, and F1 by model (EfficientNet, YOLO, ensemble) for child, female, and male classes">
-        <div class="figure-caption">
-          <span class="figure-caption-text">The ensemble leads on recall, precision, and F1 for every class, most sharply for male precision (90 vs. 51/45) and female recall (77 vs. 49/32).</span>
-          <span class="figure-caption-tag">20-crop review</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="content-section">
-    <div class="content-inner">
-      <h2>Detections and label distribution</h2>
-      <div class="prose">
-        <p>Riders &mdash; people on motorbikes or bicycles, filtered by the Stage 1 gate before gender classification &mdash; make up 60.1% of all 1,307,236 detections. Of the 521,519 crops that pass through to Stage 2, the pooled split is 65.9% male, 15.8% female, 7.1% child, and 11.2% unknown, giving a pooled male:female ratio of 4.18:1 &mdash; the reference line plotted against each individual phase below.</p>
-      </div>
-      <div class="figure-card">
-        <img src="label_distribution.png" alt="Bar charts of label distribution per phase for rider, male, female, child, and unknown classes across phases 1a, 1b, 2, and 3">
-        <div class="figure-caption">
-          <span class="figure-caption-text">Phases 1a, 1b, and 2 track closely (M:F 3.77&ndash;3.87). Phase 3 is the exception, at 6.16.</span>
-          <span class="figure-caption-tag">n=1,307,236</span>
-        </div>
+        <p>EfficientNet-B3 and YOLO11m-cls are trained on the same crops but trusted for different things. EfficientNet drives every continuous gender score in the released data &mdash; YOLO alone is barely above chance for female-vs-male (ROC-AUC &asymp; 0.535). YOLO drives the child gate instead, since EfficientNet's child head fires too broadly. The two only get averaged for the discrete label decision, where their independent error patterns partially cancel right at the threshold.</p>
+        <p>The confusion matrices below come from a manual audit sweeping detection confidence from 0.02 to 0.09 &mdash; below the pipeline's actual 0.22 operating threshold. Read as a sensitivity check: they show what classification quality looks like if the detector were run far more permissively than it actually is, and how much "Noise" (non-person false positives) contaminates the sample at very low thresholds.</p>
       </div>
       <div class="figure-grid">
         <div class="figure-card">
-          <img src="mf_ratio_by_phase.png" alt="Bar chart of male to female ratio by phase, with a reference line at the pooled ratio of 4.18">
+          <img src="assets/gender/confusion_matrix_conf_0_2.png" alt="Confusion matrix at confidence level 0.02 comparing EFF, YOLO, and Ensemble predictions against audited ground truth">
           <div class="figure-caption">
-            <span class="figure-caption-text">Phase 3 sits well above the pooled reference; the other three sit slightly below it.</span>
+            <span class="figure-caption-text">Lowest confidence tested &mdash; Noise makes up a large share of every predicted column.</span>
           </div>
         </div>
         <div class="figure-card">
-          <img src="mf_ratio_by_year.png" alt="Bar chart of male to female ratio by year from 2013 to 2019, trending downward, with a reference line at 4.18">
+          <img src="assets/gender/confusion_matrix_conf_0_5.png" alt="Confusion matrix at confidence level 0.05 comparing EFF, YOLO, and Ensemble predictions against audited ground truth">
           <div class="figure-caption">
-            <span class="figure-caption-text">A steady decline from 4.72 (2013) to 3.78 (2019) &mdash; relatively more female detections in later years.</span>
+            <span class="figure-caption-text">Midpoint &mdash; Ensemble diagonal accuracy climbing for Male and Female.</span>
+          </div>
+        </div>
+        <div class="figure-card">
+          <img src="assets/gender/confusion_matrix_conf_0_9.png" alt="Confusion matrix at confidence level 0.09 comparing EFF, YOLO, and Ensemble predictions against audited ground truth">
+          <div class="figure-caption">
+            <span class="figure-caption-text">Highest confidence tested &mdash; Noise has nearly vanished; Ensemble Male/Female accuracy at its strongest.</span>
           </div>
         </div>
       </div>
       <div class="caveat-note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.2" r="0.3" fill="currentColor"/></svg>
-        <span>Phase 3's 6.16:1 ratio is driven by fewer female and more child detections than the other three phases see. It isn't confined to hard label counts &mdash; Phase 3's continuous femininity scores sit measurably lower across both individual models too, so this isn't a labelling-threshold artifact. The cause hasn't been isolated yet; flagged here rather than smoothed over.</span>
+        <span>The exact parameter this sweep varies hasn't been confirmed against the code yet &mdash; the reading above is inferred from the pattern (all values sit below every real operating threshold in the pipeline), not stated in the source material. Treat the specific axis label as provisional until confirmed.</span>
       </div>
     </div>
   </section>
 
   <section class="content-section">
     <div class="content-inner">
-      <h2>The unknown class</h2>
+      <h2>Filtering before scoring</h2>
       <div class="prose">
-        <p>Unknown sits at a steady 4.4&ndash;4.5% of detections in every phase and every year &mdash; the clearest sign that it reflects genuine classifier uncertainty rather than a phase-specific or temporal artifact. It isn't a trained fourth class: it's assigned post-hoc from a compound rule over both models' femininity scores, visualised below as three reference lines &mdash; a low-confidence floor around 0.25, an upper bound on the YOLO branch around 0.5, and a combined threshold near 0.62. These cutoffs are reverse-engineered from the score distributions rather than read from source, so treat the exact values as provisional. This is the same signal that feeds SUI on the methods page: rather than discard uncertain detections, they're counted and reported.</p>
+        <p>Roughly 65% of raw person detections are motorcycle or bicycle riders &mdash; filtered by a dual gate (geometric IoU against vehicle boxes, plus a learned EfficientNet-B0 classifier) before any gender scoring happens. A crop can also be excluded for two further reasons, at two earlier pipeline stages:</p>
       </div>
-      <div class="figure-card">
-        <img src="unknown_analysis.png" alt="Three-panel chart: unknown count per phase, unknown count per year, and the eff_w vs yolo_w score distributions with threshold reference lines">
-        <div class="figure-caption">
-          <span class="figure-caption-text">Unknown rate is flat across phases (4.4&ndash;4.5%) and across years (3.9&ndash;5.0%), aside from 2014's small sample.</span>
-          <span class="figure-caption-tag">low=0.25 &middot; yolo_upper=0.5 &middot; thresh=0.62</span>
+      <div class="stage-grid">
+        <div class="stage-card">
+          <p class="card-eyebrow">Detection stage</p>
+          <h3>low_conf</h3>
+          <p>The person detector itself wasn't confident there was a person there. Nothing to do with gender.</p>
+        </div>
+        <div class="stage-card">
+          <p class="card-eyebrow">Quality stage</p>
+          <h3>bad_quality</h3>
+          <p>Failed the pose/blur/exposure gate before gender classification was attempted.</p>
+        </div>
+        <div class="stage-card">
+          <p class="card-eyebrow">Gender stage</p>
+          <h3>unknown</h3>
+          <p>Passed detection and quality; the gender classifier's own confidence landed in the uncertain band (~12.1% of pedestrian rows).</p>
         </div>
       </div>
     </div>
@@ -112,31 +99,65 @@
 
   <section class="content-section">
     <div class="content-inner">
-      <h2>Data completeness</h2>
+      <h2>A field-calibrated threshold</h2>
       <div class="prose">
-        <p>Two structural checks, both clean. Heading coverage: only 96 of 241,423 panoids (0.04%) are missing one or more of the six headings, concentrated slightly more in Phase 3 (33 panoids) than elsewhere. Detection density follows the expected shape in every phase &mdash; most images contain one or two pedestrians, tailing off sharply beyond that, with no phase behaving differently from the others.</p>
+        <p>Labels aren't assigned at a fixed 0.5 cutoff. A single global threshold, &tau; = 0.6275, is calibrated so the pipeline's aggregate male:female ratio matches an independently field-observed rate of 4.18 men per woman (achieved: 4.199:1) &mdash; the same threshold applies everywhere, deliberately, so no district's calibration can absorb the spatial variation GPI exists to measure. The full derivation, including why this approach is robust to the sigmoid miscalibration that affects raw model scores, is on the <a href="methods.html">Methods</a> page.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Validating the child gate</h2>
+      <div class="prose">
+        <p>A manual audit of 8,321 classifier crops across all models, phases, and confidence bins checked the child gate specifically for adult contamination. Weighting audit rates by where child predictions actually concentrate (31% sit in the 0.6 confidence bin, only 19% in the 0.9 bin), the expected true composition of the 12,344 child-labelled rows is approximately <strong>58% genuine children, 26% adult males, 9% adult females, and 7% riders or noise</strong>.</p>
+        <p>Propagated to the overall gender counts, misrouted adult males amount to ~3.5% of the total male count, and misrouted adult females ~5.0% of the total female count. These largely offset each other in the male:female ratio, and the net direction is conservative &mdash; the correction slightly <em>increases</em> the reported female share rather than inflating it.</p>
+      </div>
+      <div class="stat-inline-row">
+        <div class="stat-inline"><span class="stat-value">8,321</span><span class="stat-label">crops manually audited</span></div>
+        <div class="stat-inline"><span class="stat-value">~58%</span><span class="stat-label">child label = genuine child</span></div>
+        <div class="stat-inline"><span class="stat-value">3.5%</span><span class="stat-label">of male count misrouted</span></div>
+        <div class="stat-inline"><span class="stat-value">5.0%</span><span class="stat-label">of female count misrouted</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Data integrity</h2>
+      <div class="prose">
+        <p>Two bugs were found and repaired in this pipeline: a missing per-box index that scrambled score-to-person assignment in multi-person images, and a filename-collision bug that cropped roughly 150,000 images from the wrong source in one collection phase. Post-repair, an apparent demographic difference that had appeared in one phase vanished entirely &mdash; all four phases now agree on the naive male:female ratio to within 0.02. Full details on <a href="methods.html">Methods</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Label distribution by phase</h2>
+      <div class="prose">
+        <p>Pending updated data &mdash; arriving alongside the repaired pipeline's full output.</p>
+      </div>
+      <div class="figure-placeholder">
+        <p class="figure-placeholder-label">Chart pending &mdash; save the new plot as:</p>
+        <span class="figure-placeholder-path">assets/gender/label_distribution.png</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Male:female ratio, by phase and by year</h2>
+      <div class="prose">
+        <p>Pending updated data. With the filename-collision bug repaired, this is the chart that should now show the four phases agreeing to within 0.02 mentioned above.</p>
       </div>
       <div class="figure-grid">
-        <div class="figure-card">
-          <img src="angle_coverage.png" alt="Bar charts showing panoids with incomplete angle sets, totalling 0.04% of the dataset, broken down by phase">
-          <div class="figure-caption">
-            <span class="figure-caption-text">96 of 241,423 panoids affected; 94 of those are missing just one heading.</span>
-          </div>
+        <div class="figure-placeholder">
+          <p class="figure-placeholder-label">Chart pending &mdash; save as:</p>
+          <span class="figure-placeholder-path">assets/gender/mf_ratio_by_phase.png</span>
         </div>
-        <div class="figure-card">
-          <img src="detections_per_image.png" alt="Histograms of detection count per image for phases 1a, 1b, 2, and 3, all showing a similar right-skewed shape">
-          <div class="figure-caption">
-            <span class="figure-caption-text">All four phases show the same right-skewed shape &mdash; most images hold 1&ndash;2 detections.</span>
-          </div>
-        </div>
-      </div>
-      <div class="prose">
-        <p>Bounding-box heights also separate by predicted class: male detections span a notably wider and taller range than female, child, or unknown, which cluster at smaller box heights. This is worth keeping in mind alongside the confusion-matrix results above &mdash; crop size is a plausible contributor to classification difficulty, not just image content.</p>
-      </div>
-      <div class="figure-card">
-        <img src="box_height_distribution.png" alt="Overlapping histogram of bounding box height in pixels by predicted label, with male extending to a wider range than female, child, or unknown">
-        <div class="figure-caption">
-          <span class="figure-caption-text">Male boxes extend well past 200px; female, child, and unknown concentrate under 80px.</span>
+        <div class="figure-placeholder">
+          <p class="figure-placeholder-label">Chart pending &mdash; save as:</p>
+          <span class="figure-placeholder-path">assets/gender/mf_ratio_by_year.png</span>
         </div>
       </div>
     </div>
