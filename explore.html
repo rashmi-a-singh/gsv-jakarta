@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Explore — GSV-Jakarta</title>
+<meta name="description" content="Interactive hex-grid density map of all 68,685 sampling cells across the full panoid universe — 242,439 panoramas, phase by phase.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">GSV<span>·Jakarta</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="maps.html" class="nav-link">Maps</a>
+      <a href="segmentation.html" class="nav-link">Segmentation</a>
+      <a href="gender.html" class="nav-link">Gender</a>
+      <a href="litreview.html" class="nav-link">Lit review</a>
+      <a href="methods.html" class="nav-link">Methods</a>
+      <a href="explore.html" class="nav-link active">Explore</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <p class="eyebrow">Full dataset</p>
+      <h1 class="page-title">Explore</h1>
+      <p class="page-intro">Every one of the 68,685 sampling hexagons in the panoid universe, colored by which phase(s) landed there and how many panoramas each cell holds. This is the raw sampling grid itself, not a curated view &mdash; toggle phases off to isolate one, or leave them all on to see the full picture. Click any cell for its exact counts.</p>
+    </div>
+  </section>
+
+  <section class="explore-toolbar">
+    <div class="explore-toolbar-inner">
+      <span class="toolbar-label">Phase</span>
+      <button class="phase-pill" data-phase="1a"><span class="dot" style="background:#6fa3d8"></span>1a</button>
+      <button class="phase-pill" data-phase="1b"><span class="dot" style="background:#e2a355"></span>1b</button>
+      <button class="phase-pill" data-phase="2"><span class="dot" style="background:#83cd97"></span>2</button>
+      <button class="phase-pill" data-phase="3"><span class="dot" style="background:#cd93d1"></span>3</button>
+      <span class="explore-stats" id="explore-stats">Loading&hellip;</span>
+    </div>
+  </section>
+
+  <section class="map-wrap">
+    <div id="hexmap"></div>
+    <div class="map-loading" id="map-loading">Loading 68,685 cells&hellip;</div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <div class="caveat-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.2" r="0.3" fill="currentColor"/></svg>
+        <span>Cell color blends the active phases' brand colors, weighted by each phase's panorama count in that cell; opacity scales with total density (cells hold 0&ndash;7 panoramas each, consistent with the ~3.5 average panoramas per hexagon across the sampling grid). An earlier per-point version of this map covered a subset of panoramas and struggled past a few hundred thousand individual markers &mdash; aggregating to the actual 68,685 sampling cells, rather than plotting all 242,439 panoramas individually, is what makes the full dataset renderable in a browser at all.</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <p class="footer-affiliation">London School of Economics and Political Science &middot; International Growth Centre</p>
+      <p class="footer-name">Rashmi A. Singh</p>
+    </div>
+    <div>
+      <p class="footer-note">Working research site &mdash; figures and results are provisional and may be revised as data collection and validation continue.</p>
+      <a href="https://github.com/rashmi-a-singh/gsv-jakarta" class="footer-github">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5a10.5 10.5 0 0 0-3.32 20.47c.53.1.72-.23.72-.51v-1.98c-2.94.64-3.56-1.28-3.56-1.28-.48-1.22-1.18-1.55-1.18-1.55-.96-.66.07-.65.07-.65 1.07.08 1.63 1.1 1.63 1.1.94 1.62 2.47 1.15 3.08.88.1-.68.37-1.15.67-1.42-2.35-.27-4.82-1.17-4.82-5.23 0-1.16.41-2.1 1.1-2.84-.11-.27-.48-1.36.1-2.83 0 0 .9-.29 2.95 1.08a10.2 10.2 0 0 1 5.37 0c2.04-1.37 2.94-1.08 2.94-1.08.59 1.47.22 2.56.11 2.83.68.74 1.1 1.68 1.1 2.84 0 4.07-2.48 4.96-4.84 5.22.38.33.72.97.72 1.96v2.9c0 .28.19.62.73.51A10.5 10.5 0 0 0 12 1.5z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+  var PHASE_COLORS = { '1a': [111,163,216], '1b': [226,163,85], '2': [131,205,151], '3': [205,147,209] };
+  var PHASE_IDX = { '1a': 4, '1b': 5, '2': 6, '3': 7 };
+  var active = { '1a': true, '1b': true, '2': true, '3': true };
+  var allCells = [];
+  var map, hexLayer;
+
+  function hexagonLatLngs(lat, lon, radiusM) {
+    var dLat = radiusM / 111320;
+    var dLon = radiusM / (111320 * Math.cos(lat * Math.PI / 180));
+    var pts = [];
+    for (var i = 0; i < 6; i++) {
+      var rad = (Math.PI / 180) * (60 * i);
+      pts.push([lat + dLat * Math.sin(rad), lon + dLon * Math.cos(rad)]);
+    }
+    return pts;
+  }
+
+  function cellColor(c) {
+    var r = 0, g = 0, b = 0, wsum = 0;
+    for (var p in PHASE_IDX) {
+      if (!active[p]) continue;
+      var w = c[PHASE_IDX[p]];
+      if (w <= 0) continue;
+      var col = PHASE_COLORS[p];
+      r += col[0] * w; g += col[1] * w; b += col[2] * w; wsum += w;
+    }
+    if (wsum === 0) return null;
+    return { rgb: [Math.round(r / wsum), Math.round(g / wsum), Math.round(b / wsum)], total: wsum };
+  }
+
+  function render() {
+    hexLayer.clearLayers();
+    var shownCells = 0, shownTotal = 0;
+    for (var i = 0; i < allCells.length; i++) {
+      var c = allCells[i];
+      var res = cellColor(c);
+      if (!res) continue;
+      shownCells++; shownTotal += res.total;
+      var opacity = 0.22 + 0.68 * Math.min(res.total / 6, 1);
+      var rgb = 'rgb(' + res.rgb[0] + ',' + res.rgb[1] + ',' + res.rgb[2] + ')';
+      var poly = L.polygon(hexagonLatLngs(c[1], c[2], 27), {
+        renderer: canvasRenderer, color: rgb, weight: 0, fillColor: rgb, fillOpacity: opacity
+      });
+      poly.bindPopup(
+        '<b>Cell ' + c[0] + '</b><br>Total: ' + c[3] +
+        '<br>1a: ' + c[4] + ' &middot; 1b: ' + c[5] + ' &middot; 2: ' + c[6] + ' &middot; 3: ' + c[7]
+      );
+      hexLayer.addLayer(poly);
+    }
+    document.getElementById('explore-stats').textContent =
+      shownCells.toLocaleString() + ' cells shown \u00b7 ' + shownTotal.toLocaleString() + ' panoramas';
+  }
+
+  var canvasRenderer;
+
+  map = L.map('hexmap', { preferCanvas: true }).setView([-6.2309, 106.8297], 11);
+  canvasRenderer = L.canvas({ padding: 0.5 });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd', maxZoom: 20
+  }).addTo(map);
+
+  hexLayer = L.layerGroup().addTo(map);
+
+  fetch('assets/hexcells.json')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      allCells = data.cells;
+      render();
+      document.getElementById('map-loading').style.opacity = '0';
+      setTimeout(function () {
+        document.getElementById('map-loading').style.display = 'none';
+      }, 300);
+    })
+    .catch(function (err) {
+      document.getElementById('map-loading').textContent = 'Could not load hexcells.json — check the file is uploaded alongside this page.';
+    });
+
+  document.querySelectorAll('.phase-pill').forEach(function (pill) {
+    pill.addEventListener('click', function () {
+      var p = pill.getAttribute('data-phase');
+      active[p] = !active[p];
+      pill.classList.toggle('off', !active[p]);
+      render();
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
