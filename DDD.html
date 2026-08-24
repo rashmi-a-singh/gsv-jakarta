@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DDD Validation — GSV-Jakarta</title>
+<meta name="description" content="Validating the gender classifier against hand-labelled Street View imagery collected by Digital Data Divide.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">GSV<span>·Jakarta</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="maps.html" class="nav-link">Maps</a>
+      <a href="segmentation.html" class="nav-link">Segmentation</a>
+      <a href="gender.html" class="nav-link">Gender</a>
+      <a href="litreview.html" class="nav-link">Lit review</a>
+      <a href="methods.html" class="nav-link">Methods</a>
+      <a href="ddd_validation.html" class="nav-link active">DDD Validation</a>
+      <a href="explore.html" class="nav-link">Explore</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <p class="eyebrow">Evaluation Memo</p>
+      <h1 class="page-title">DDD Validation</h1>
+      <p class="page-intro">The gender-recognition pipeline was run over 31,074 hand-annotated Street View images collected by Digital Data Divide (DDD)[cite: 7]. This page compares the machine's output, panorama by panorama, against human annotations across 4,765 panoramas from 2013–2019[cite: 7].</p>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Executive Summary</h2>
+      <div class="prose">
+        <p><strong>The headline finding is that the aggregate ratio and the individual classifications give opposite verdicts, and only the first is favourable[cite: 7].</strong></p>
+        <ul>
+          <li><strong>Aggregate Ratio:</strong> At a threshold of &tau; = 0.6275, the machine reports a male-to-female ratio of 2.85–2.97 against a hand-labelled truth of 2.944[cite: 7]. (Note: at the newly confirmed &tau; = 0.62, the ratio is 2.75–2.86[cite: 7]). This is the first independent check that the threshold has ever received[cite: 7].</li>
+          <li><strong>Per-Person Accuracy:</strong> Individual agreement over the same panoramas is poor[cite: 7]. The machine finds only 53% of the women the annotators recorded[cite: 7]. When the machine reports a woman, 42.5% of the time the annotator saw none[cite: 7].</li>
+        </ul>
+        <p>The ratio is correct because the errors offset, not because the individual classification is highly accurate[cite: 7].</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>The Ratio Agrees</h2>
+      <div class="prose">
+        <p>This comparison evaluates two scenarios: Scenario A (excluding <code>bad_quality</code> boxes, leaving 3,757 people) and Scenario B (retaining <code>bad_quality</code> boxes, leaving 6,810 people)[cite: 7].</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Threshold (&tau;)</th>
+              <th>Machine M:F (Scenario A)</th>
+              <th>Machine M:F (Scenario B)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0.57</td>
+              <td>2.02</td>
+              <td>2.14</td>
+            </tr>
+            <tr>
+              <td>0.59</td>
+              <td>2.27</td>
+              <td>2.38</td>
+            </tr>
+            <tr>
+              <td><strong>0.62</strong></td>
+              <td><strong>2.75</strong></td>
+              <td><strong>2.86</strong></td>
+            </tr>
+            <tr>
+              <td>0.6275</td>
+              <td>2.85</td>
+              <td>2.97</td>
+            </tr>
+            <tr>
+              <td>0.65</td>
+              <td>3.21</td>
+              <td>3.32</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>Hand labels on these same panoramas give a ratio of <strong>2.944</strong>[cite: 7]. While the threshold was originally fitted to an assumed field ratio, it now survives contact with independent evidence[cite: 7].</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>The Classifications Do Not</h2>
+      <div class="prose">
+        <p>Decomposing the count error for women under Scenario B at the original 0.6275 benchmark reveals substantial unreliability in both directions[cite: 7]:</p>
+        <ul>
+          <li>Annotators recorded 3,241 women; the machine reported 1,717[cite: 7].</li>
+          <li>2,527 women were missed entirely across 1,262 panoramas[cite: 7].</li>
+          <li>1,003 women were reported where the annotator recorded fewer or none[cite: 7].</li>
+        </ul>
+        <p>The net of &minus;2,527 and +1,003 is what produces 53% of the hand total, netting to approximately the right ratio[cite: 7]. Men show the same undercount (53.4%) but far cleaner positives (only 14.8% false)[cite: 7]. Furthermore, as the threshold rises to improve the aggregate ratio, per-person agreement (Cohen's &kappa;) monotonically declines[cite: 7].</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Where the People Go (The Funnel)</h2>
+      <div class="prose">
+        <p>The single most useful decomposition shows that the pipeline finds people and then discards them based on exclusion rules that have never been validated against hand labels[cite: 7]. Over the same 4,765 panoramas[cite: 7]:</p>
+        <ul>
+          <li><strong>Everyone the annotators saw:</strong> 16,462 (including 12,784 adults whose gender could be identified)[cite: 7].</li>
+          <li><strong>People the model detected:</strong> 30,901 (The detector found 188% of everyone the annotators counted)[cite: 7].</li>
+          <li><strong>After the rider gate:</strong> 10,494 remaining[cite: 7].</li>
+          <li><strong>After the confidence gate:</strong> 6,810 remaining[cite: 7].</li>
+          <li><strong>After the size gate:</strong> 3,757 remaining[cite: 7].</li>
+        </ul>
+        <p>Ultimately, the gender model only ever sees 12% to 22% of the people the detector originally located[cite: 7]. A claim that "the model misses women" is incomplete; the pipeline <em>finds</em> people but discards them via gates[cite: 7].</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <p class="footer-affiliation">London School of Economics and Political Science &middot; International Growth Centre</p>
+      <p class="footer-name">Rashmi A. Singh</p>
+    </div>
+    <div>
+      <p class="footer-note">Working research site &mdash; figures and results are provisional and may be revised as data collection and validation continue.</p>
+      <a href="https://github.com/rashmi-a-singh/gsv-jakarta" class="footer-github">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5a10.5 10.5 0 0 0-3.32 20.47c.53.1.72-.23.72-.51v-1.98c-2.94.64-3.56-1.28-3.56-1.28-.48-1.22-1.18-1.55-1.18-1.55-.96-.66.07-.65.07-.65 1.07.08 1.63 1.1 1.63 1.1.94 1.62 2.47 1.15 3.08.88.1-.68.37-1.15.67-1.42-2.35-.27-4.82-1.17-4.82-5.23 0-1.16.41-2.1 1.1-2.84-.11-.27-.48-1.36.1-2.83 0 0 .9-.29 2.95 1.08a10.2 10.2 0 0 1 5.37 0c2.04-1.37 2.94-1.08 2.94-1.08.59 1.47.22 2.56.11 2.83.68.74 1.1 1.68 1.1 2.84 0 4.07-2.48 4.96-4.84 5.22.38.33.72.97.72 1.96v2.9c0 .28.19.62.73.51A10.5 10.5 0 0 0 12 1.5z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
