@@ -41,8 +41,8 @@
     <div class="content-inner">
       <h2>Why two models, not one</h2>
       <div class="prose">
-        <p>EfficientNet-B3 and YOLO11m-cls are trained on the same crops but trusted for different things. EfficientNet drives every continuous gender score in the released data &mdash; YOLO alone is barely above chance for female-vs-male (ROC-AUC &asymp; 0.535). YOLO drives the child gate instead, since EfficientNet's child head fires too broadly. The two only get averaged for the discrete label decision, where their independent error patterns partially cancel right at the threshold.</p>
-        <p>The confusion matrices below come from a manual audit sweeping detection confidence from 0.02 to 0.09 &mdash; below the pipeline's actual 0.22 operating threshold. Read as a sensitivity check: they show what classification quality looks like if the detector were run far more permissively than it actually is, and how much "Noise" (non-person false positives) contaminates the sample at very low thresholds.</p>
+        <p>EfficientNet-B3 and YOLO11m-cls are trained on the same crops but trusted for different things. EfficientNet drives every continuous gender score in the released data &mdash; YOLO alone is barely above chance for female-vs-male (ROC-AUC &asymp; 0.535)[cite: 4]. YOLO drives the child gate instead, since EfficientNet's child head fires too broadly[cite: 4]. The two only get averaged for the discrete label decision, where their independent error patterns partially cancel right at the threshold[cite: 4]. Note that while the training author explicitly warned against using a pseudo-softmax average for these scores, the deployed pipeline utilizes this ensemble method regardless[cite: 3].</p>
+        <p>The confusion matrices below come from a manual audit sweeping detection confidence from 0.02 to 0.09 &mdash; below the pipeline's actual 0.22 operating threshold[cite: 4]. Read as a sensitivity check: they show what classification quality looks like if the detector were run far more permissively than it actually is, and how much "Noise" (non-person false positives) contaminates the sample at very low thresholds[cite: 4].</p>
       </div>
       <div class="figure-grid">
         <div class="figure-card">
@@ -66,7 +66,7 @@
       </div>
       <div class="caveat-note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.2" r="0.3" fill="currentColor"/></svg>
-        <span>The exact parameter this sweep varies hasn't been confirmed against the code yet &mdash; the reading above is inferred from the pattern (all values sit below every real operating threshold in the pipeline), not stated in the source material. Treat the specific axis label as provisional until confirmed.</span>
+        <span>The exact parameter this sweep varies hasn't been confirmed against the code yet &mdash; the reading above is inferred from the pattern (all values sit below every real operating threshold in the pipeline), not stated in the source material[cite: 4]. Treat the specific axis label as provisional until confirmed[cite: 4].</span>
       </div>
     </div>
   </section>
@@ -75,23 +75,23 @@
     <div class="content-inner">
       <h2>Filtering before scoring</h2>
       <div class="prose">
-        <p>Roughly 65% of raw person detections are motorcycle or bicycle riders &mdash; filtered by a dual gate (geometric IoU against vehicle boxes, plus a learned EfficientNet-B0 classifier) before any gender scoring happens. A crop can also be excluded for two further reasons, at two earlier pipeline stages:</p>
+        <p>The detector is highly sensitive, locating 188% of everyone the human annotators counted[cite: 1]. However, the gender classification model only evaluates 12% to 22% of these detected individuals[cite: 1, 3]. Roughly 65% of raw person detections are motorcycle or bicycle riders &mdash; filtered by a dual gate (geometric IoU against vehicle boxes, plus a learned EfficientNet-B0 classifier) before any gender scoring happens[cite: 4]. The rider gate alone removes two-thirds of all detected people, and it has never been validated against hand labels[cite: 1, 3]. A crop can also be excluded for two further reasons, at two earlier pipeline stages:</p>
       </div>
       <div class="stage-grid">
         <div class="stage-card">
           <p class="card-eyebrow">Detection stage</p>
           <h3>low_conf</h3>
-          <p>The person detector itself wasn't confident there was a person there. Nothing to do with gender.</p>
+          <p>The person detector itself wasn't confident there was a person there[cite: 4]. Nothing to do with gender[cite: 4].</p>
         </div>
         <div class="stage-card">
           <p class="card-eyebrow">Quality stage</p>
           <h3>bad_quality</h3>
-          <p>Failed the pose/blur/exposure gate before gender classification was attempted.</p>
+          <p>Failed the pose/blur/exposure gate before gender classification was attempted[cite: 4].</p>
         </div>
         <div class="stage-card">
           <p class="card-eyebrow">Gender stage</p>
           <h3>unknown</h3>
-          <p>Passed detection and quality; the gender classifier's own confidence landed in the uncertain band (~12.1% of pedestrian rows).</p>
+          <p>Passed detection and quality; the gender classifier's own confidence landed in the uncertain band (~12.1% of pedestrian rows)[cite: 4].</p>
         </div>
       </div>
     </div>
@@ -99,9 +99,11 @@
 
   <section class="content-section">
     <div class="content-inner">
-      <h2>A field-calibrated threshold</h2>
+      <h2>Validation, Prior Shift, and Thresholds</h2>
       <div class="prose">
-        <p>Labels aren't assigned at a fixed 0.5 cutoff. A single global threshold, &tau; = 0.6275, is calibrated so the pipeline's aggregate male:female ratio matches an independently field-observed rate of 4.18 men per woman (achieved: 4.199:1) &mdash; the same threshold applies everywhere, deliberately, so no district's calibration can absorb the spatial variation GPI exists to measure. The full derivation, including why this approach is robust to the sigmoid miscalibration that affects raw model scores, is on the <a href="methods.html">Methods</a> page.</p>
+        <p><strong>Training vs. Reality (Prior Shift):</strong> The model was deliberately trained on a dataset heavily weighted toward women (49.6% female) to maximize minority class recall, whereas Jakarta's actual street population is roughly 25.4% female[cite: 3]. The deployment threshold is used specifically as a counterweight to offset this designed training bias[cite: 3].</p>
+        <p><strong>Aggregate Validation:</strong> At the deployed threshold (currently noted in documentation as 0.6275), the model reports a male-to-female ratio of 2.85–2.97[cite: 1]. This closely matches the independent hand-labelled ground truth of 2.944, aligning to within about 2%[cite: 1]. This marks the first independent validation of the threshold's aggregate accuracy[cite: 1].</p>
+        <p><strong>Per-Person Accuracy Limitations:</strong> While the aggregate ratio is accurate, it is achieved because opposing errors cancel each other out, not because individual classifications are reliable[cite: 1]. For women, the model's sensitivity is 0.16–0.24, with a Cohen's &kappa; of 0.14–0.19[cite: 1]. The system finds approximately 53% of the women that annotators recorded, and when it flags a detection as a woman, it is incorrect 42.5% of the time[cite: 1]. Furthermore, the "Male" category functions as a residual class; 38% of "male" classifications on audited crops are not adult men[cite: 1, 3].</p>
       </div>
     </div>
   </section>
@@ -110,8 +112,8 @@
     <div class="content-inner">
       <h2>Validating the child gate</h2>
       <div class="prose">
-        <p>A manual audit of 8,321 classifier crops across all models, phases, and confidence bins checked the child gate specifically for adult contamination. Weighting audit rates by where child predictions actually concentrate (31% sit in the 0.6 confidence bin, only 19% in the 0.9 bin), the expected true composition of the 12,344 child-labelled rows is approximately <strong>58% genuine children, 26% adult males, 9% adult females, and 7% riders or noise</strong>.</p>
-        <p>Propagated to the overall gender counts, misrouted adult males amount to ~3.5% of the total male count, and misrouted adult females ~5.0% of the total female count. These largely offset each other in the male:female ratio, and the net direction is conservative &mdash; the correction slightly <em>increases</em> the reported female share rather than inflating it.</p>
+        <p>A manual audit of 8,321 classifier crops across all models, phases, and confidence bins checked the child gate specifically for adult contamination[cite: 4]. Weighting audit rates by where child predictions actually concentrate (31% sit in the 0.6 confidence bin, only 19% in the 0.9 bin), the expected true composition of the 12,344 child-labelled rows is approximately <strong>58% genuine children, 26% adult males, 9% adult females, and 7% riders or noise</strong>[cite: 4].</p>
+        <p>Propagated to the overall gender counts, misrouted adult males amount to ~3.5% of the total male count, and misrouted adult females ~5.0% of the total female count[cite: 4]. These largely offset each other in the male:female ratio, and the net direction is conservative &mdash; the correction slightly <em>increases</em> the reported female share rather than inflating it[cite: 4].</p>
       </div>
       <div class="stat-inline-row">
         <div class="stat-inline"><span class="stat-value">8,321</span><span class="stat-label">crops manually audited</span></div>
@@ -126,7 +128,7 @@
     <div class="content-inner">
       <h2>Data integrity</h2>
       <div class="prose">
-        <p>Two bugs were found and repaired in this pipeline: a missing per-box index that scrambled score-to-person assignment in multi-person images, and a filename-collision bug that cropped roughly 150,000 images from the wrong source in one collection phase. Post-repair, an apparent demographic difference that had appeared in one phase vanished entirely &mdash; all four phases now agree on the naive male:female ratio to within 0.02. Full details on <a href="methods.html">Methods</a>.</p>
+        <p>Two bugs were found and repaired in this pipeline: a missing per-box index that scrambled score-to-person assignment in multi-person images, and a filename-collision bug that cropped roughly 150,000 images from the wrong source in one collection phase[cite: 4]. Crucially, the <code>box_idx</code> bug corrupts multi-person scenes, which is not gender-neutral &mdash; hand labels show that women appear in mixed-gender groups 23% of the time, compared to 9% for men[cite: 3]. Post-repair, an apparent demographic difference that had appeared in one phase vanished entirely &mdash; all four phases now agree on the naive male:female ratio to within 0.02[cite: 4]. Full details on <a href="methods.html">Methods</a>.</p>
       </div>
     </div>
   </section>
@@ -135,7 +137,7 @@
     <div class="content-inner">
       <h2>Label distribution by phase</h2>
       <div class="prose">
-        <p>Pending updated data &mdash; arriving alongside the repaired pipeline's full output.</p>
+        <p>Pending updated data &mdash; arriving alongside the repaired pipeline's full output[cite: 4].</p>
       </div>
       <div class="figure-placeholder">
         <p class="figure-placeholder-label">Chart pending &mdash; save the new plot as:</p>
@@ -148,7 +150,7 @@
     <div class="content-inner">
       <h2>Male:female ratio, by phase and by year</h2>
       <div class="prose">
-        <p>Pending updated data. With the filename-collision bug repaired, this is the chart that should now show the four phases agreeing to within 0.02 mentioned above.</p>
+        <p>Pending updated data[cite: 4]. With the filename-collision bug repaired, this is the chart that should now show the four phases agreeing to within 0.02 mentioned above[cite: 4].</p>
       </div>
       <div class="figure-grid">
         <div class="figure-placeholder">
