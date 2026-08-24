@@ -33,22 +33,37 @@
     <div class="page-hero-inner">
       <p class="eyebrow">Streetscape</p>
       <h1 class="page-title">Segmentation</h1>
-      <p class="page-intro">Pixel-level streetscape composition across 1,436,461 images and four data collection phases &mdash; what Jakarta's streets are made of, how consistent that picture is across phases and years, and which classes tend to appear together.</p>
+      <p class="page-intro">Pixel-level streetscape composition across a final deliverable dataset of 1,447,332 rows[cite: 2]. This covers four primary data collection phases, plus a 118-image "Phase 4" repair batch targeting missing angles[cite: 2]. Below is a breakdown of what Jakarta's streets are made of, how consistent that picture is across phases and years, and which classes tend to appear together.</p>
     </div>
   </section>
 
   <section class="content-section">
     <div class="content-inner">
-      <h2>Data quality: the Phase 3 anomaly, resolved</h2>
+      <h2>Data Interpretation Rules & Caveats</h2>
+      <div class="prose">
+        <p>Before analyzing the segmentation data, it is critical to understand a few structural rules regarding the dataset's composition[cite: 2]:</p>
+        <ul>
+          <li><strong>Non-Partition Ratios:</strong> The 28 recorded ratios represent the share of the frame occupied by a category, but they do not sum to 1[cite: 2]. Because object masks can overlap (e.g., a tree in front of a building), approximately 13% of images sum to above 1.0[cite: 2].</li>
+          <li><strong>Empty Categories:</strong> Three specific classes (<code>woman</code>, <code>child</code>, and <code>other_rider</code>) are structurally empty because those model heads were never trained[cite: 2]. They return exactly 0.0 across all 1.45 million rows and carry no signal[cite: 2]. Gender is derived exclusively from the separate detection pipeline, not the segmentation model[cite: 2].</li>
+          <li><strong>Nulls vs. Zeros:</strong> Ensure you filter on <code>has_segmentation</code>. Ratios on the 37,164 unsegmented rows are <code>NULL</code>, so a <code>0.0</code> always means the model looked and found none of that object, never "no data"[cite: 2].</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Data quality: Anomalies and resolutions</h2>
       <div class="prose">
         <p>An earlier run of Phase 3 showed near-zero vegetation and building coverage alongside an anomalously high crosswalk ratio, with 22.8% of rows fully blank across all 28 classes. The cause: Phase 3 had been segmented with the wrong model checkpoint in that original run, not the verified Mapillary-trained weights used for the other three phases. Re-running Phase 3 against the correct checkpoint brought every metric back in line &mdash; the panel below is that corrected state, verified row by row.</p>
         <p>A second, unrelated issue briefly inflated Phase 3's missing-<code>pano_month</code> count: roughly 6,700 Phase 3 <code>pano_id</code>s carried a trailing date suffix that failed to match the panoid universe file during the join. Stripping the suffix recovered nearly all of them, bringing Phase 3's missing-month rate down to under 1%.</p>
+        <p><strong>Phase 2 Filename Collision:</strong> A known filename collision (<code>rashmi_30k_40k</code>) caused roughly 6,000 Phase 2 panoramas to be processed against the wrong source file and misattributed to Phase 1b[cite: 2]. As a result, Phase 2's coverage drops to roughly 90% within that specific batch[cite: 2].</p>
       </div>
       <div class="figure-card">
         <img src="assets/segmentation/fig7_data_quality_panel.png" alt="Three-panel data quality chart: rows per phase, fully-blank segmentation rows by phase, and missing pano_month by phase">
         <div class="figure-caption">
-          <span class="figure-caption-text">All four phases now sit within 0.06&ndash;0.08% fully-blank rows. ~19k images (2.6% of the file) appear under two phase labels &mdash; a known structural duplicate, not an error.</span>
-          <span class="figure-caption-tag">n = 1,436,461</span>
+          <span class="figure-caption-text">All four phases now sit within 0.06&ndash;0.08% fully-blank rows. ~19k images appear under two phase labels &mdash; a known structural duplicate, not an error.</span>
+          <span class="figure-caption-tag">n = 1,447,332</span>
         </div>
       </div>
     </div>
@@ -58,13 +73,12 @@
     <div class="content-inner">
       <h2>What Jakarta's streets are made of</h2>
       <div class="prose">
-        <p>Pooled across all phases and de-duplicated to 1,417,485 unique images, vegetation, road, and building surfaces dominate the frame &mdash; together accounting for roughly three-fifths of average pixel coverage. Pedestrian infrastructure specifically (sidewalk, curb, crosswalk) is a comparatively small share, consistent with a street network built primarily around vehicle and motorbike traffic rather than pedestrians.</p>
+        <p>Pooled across the dataset, vegetation, road, and building surfaces dominate the frame &mdash; together accounting for roughly three-fifths of average pixel coverage. Pedestrian infrastructure specifically (sidewalk, curb, crosswalk) is a comparatively small share, consistent with a street network built primarily around vehicle and motorbike traffic rather than pedestrians.</p>
       </div>
       <div class="figure-card">
         <img src="assets/segmentation/fig1_class_distribution.png" alt="Horizontal bar chart of segmentation class distribution pooled across all phases, ranked from vegetation at 21.34% down to near-zero classes">
         <div class="figure-caption">
           <span class="figure-caption-text">Vegetation (21.3%), road (19.3%), and building (18.7%) lead; pedestrian-specific infrastructure (sidewalk, curb, crosswalk) sits well under 5% combined.</span>
-          <span class="figure-caption-tag">n = 1,417,485</span>
         </div>
       </div>
       <div class="figure-card">
@@ -126,7 +140,6 @@
         <img src="assets/segmentation/fig6_cooccurrence_heatmap.png" alt="Correlation heatmap of segmentation class co-occurrence across all images, with building and vegetation showing a strong negative correlation">
         <div class="figure-caption">
           <span class="figure-caption-text">Building&ndash;vegetation is the standout relationship; nearly every other class pair sits within &plusmn;0.25.</span>
-          <span class="figure-caption-tag">Pearson r &middot; n = 1,417,485</span>
         </div>
       </div>
     </div>
