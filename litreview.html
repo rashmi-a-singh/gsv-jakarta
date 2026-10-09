@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Related work — GSV-Jakarta</title>
+<meta name="description" content="The computer-vision literature GSV-Jakarta builds on: pedestrian detection and attribute recognition, street-level imagery for urban analysis, and domain adaptation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Shared additions (kept in-page so style.css doesn't need replacing) */
+  .inline-link { text-decoration: underline; text-underline-offset: 2px; }
+  .prose a, .caveat-note a, .credit-line a { text-decoration: underline; text-underline-offset: 2px; color: var(--text-primary); }
+  .figure-card { background: var(--surface); }
+  .diagram-wrap.wide svg { min-width: 880px; }
+  .scroll-hint { display: none; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-tertiary); margin: 0 0 0.5rem; }
+  @media (max-width: 900px) { .scroll-hint { display: block; } }
+  .dg-box { fill: var(--surface); stroke: var(--border-strong); stroke-width: 1; }
+  .dg-box-a { fill: var(--surface); stroke: var(--phase-1a); stroke-width: 1.4; }
+  .dg-box-b { fill: var(--surface); stroke: var(--phase-2); stroke-width: 1.4; }
+  .dg-box-out { fill: rgba(111,163,216,0.08); stroke: var(--phase-1a); stroke-width: 1.4; }
+  .dg-num { fill: var(--phase-1a); font-family: var(--font-mono); font-size: 11px; font-weight: 500; }
+  .dg-num-b { fill: var(--phase-2); font-family: var(--font-mono); font-size: 11px; font-weight: 500; }
+  .dg-title { fill: var(--text-primary); font-family: var(--font-body); font-size: 14px; font-weight: 600; }
+  .dg-sub { fill: var(--text-secondary); font-family: var(--font-mono); font-size: 11px; }
+  .dg-note { fill: var(--text-tertiary); font-family: var(--font-mono); font-size: 10.5px; }
+  .dg-track { fill: var(--text-tertiary); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; }
+  .dg-line { stroke: var(--border-strong); stroke-width: 1.5; fill: none; }
+  .dg-drop { stroke: var(--text-tertiary); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+  .dg-w { fill: var(--phase-3); }
+  .dg-m { fill: var(--phase-1a); }
+  .dg-c { fill: var(--phase-1b); }
+  .dg-x { fill: var(--text-tertiary); }
+  .diagram-caption { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; max-width: 74ch; margin: 0.6rem 0 0; }
+  .credit-line { font-size: 0.85rem; color: var(--text-tertiary); max-width: 74ch; line-height: 1.6; margin: 1.25rem 0 0; }
+  .formula-box { max-width: 74ch; }
+  .walk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: 1.5rem 0 0.5rem; }
+  .walk-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.9rem; margin: 0; }
+  .walk-card svg { width: 100%; height: auto; border-radius: 6px; }
+  .walk-step { font-family: var(--font-mono); font-size: 0.72rem; color: var(--phase-1a); letter-spacing: 0.08em; text-transform: uppercase; margin: 0.75rem 0 0.25rem; }
+  .walk-text { font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5; margin: 0; }
+  .tag-illustrative { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-tertiary); border: 1px solid var(--border-strong); border-radius: 4px; padding: 0.15rem 0.5rem; letter-spacing: 0.04em; }
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
+  .team-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+  .team-card h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; margin: 0 0 0.25rem; }
+  .team-role { font-family: var(--font-mono); font-size: 0.75rem; color: var(--phase-1a); margin: 0 0 0.8rem; letter-spacing: 0.02em; }
+  .team-card ul { margin: 0; padding-left: 1.1rem; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; }
+  .lesson-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">GSV<span>·Jakarta</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="data.html" class="nav-link">Data</a>
+      <a href="pipeline.html" class="nav-link">Pipeline</a>
+      <a href="segmentation.html" class="nav-link">Segmentation</a>
+      <a href="validation.html" class="nav-link">Validation</a>
+      <a href="litreview.html" class="nav-link active">Related work</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <p class="eyebrow">Literature</p>
+      <h1 class="page-title">Related work</h1>
+      <p class="page-intro">Three strands of computer-vision research this pipeline builds on, and where Jakarta's imagery pushes past what they were designed for.</p>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 900 262" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Concept map: GSV-Jakarta at the centre, connected to three literature strands: pedestrian detection and attributes, street-level imagery for urban analysis, and domain adaptation.">
+          <g class="dg-line">
+            <line x1="420" y1="180" x2="160" y2="96"/>
+            <line x1="450" y1="180" x2="450" y2="96"/>
+            <line x1="480" y1="180" x2="740" y2="96"/>
+          </g>
+          <rect x="355" y="180" width="190" height="66" rx="10" class="dg-box-out"/>
+          <text x="450" y="208" class="dg-title" text-anchor="middle">GSV&middot;Jakarta</text>
+          <text x="450" y="228" class="dg-sub" text-anchor="middle">this pipeline</text>
+
+          <rect x="55" y="24" width="210" height="72" rx="10" class="dg-box-a"/>
+          <text x="160" y="52" class="dg-title" text-anchor="middle">Pedestrian detection</text>
+          <text x="160" y="72" class="dg-sub" text-anchor="middle">detectors &amp; attribute models</text>
+          <text x="160" y="87" class="dg-note" text-anchor="middle">→ Stages 0–2</text>
+
+          <rect x="345" y="24" width="210" height="72" rx="10" class="dg-box-a"/>
+          <text x="450" y="52" class="dg-title" text-anchor="middle">Street-level imagery</text>
+          <text x="450" y="72" class="dg-sub" text-anchor="middle">SVI for urban analysis</text>
+          <text x="450" y="87" class="dg-note" text-anchor="middle">→ sampling &amp; segmentation</text>
+
+          <rect x="635" y="24" width="210" height="72" rx="10" class="dg-box-a"/>
+          <text x="740" y="52" class="dg-title" text-anchor="middle">Domain adaptation</text>
+          <text x="740" y="72" class="dg-sub" text-anchor="middle">benchmarks → Jakarta</text>
+          <text x="740" y="87" class="dg-note" text-anchor="middle">→ training &amp; calibration</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <p class="card-eyebrow">Strand 1</p>
+      <h2>Pedestrian detection and attribute recognition</h2>
+      <div class="prose">
+        <p>Single-pass detection has advanced steadily since YOLOv3 established one-shot bounding-box regression, through to the anchor-free heads of recent YOLO versions. Crowd benchmarks such as CrowdHuman and CityPersons pushed performance under occlusion. Attribute benchmarks such as PA-100K and PETA made gender and age classification from person crops feasible at scale. The common limitation is the data: these benchmarks come from fixed surveillance cameras and dash-cams in East Asian and European cities. Even the first demonstration that Street View could replace manual pedestrian counts (Yin et al., 2015) was tested in low-density US cities. Dense motorbike traffic, tropical light and head coverings, all at once, are outside what this literature was built on. That combination is what the rider gate and the Jakarta fine-tuning are for.</p>
+      </div>
+      <details class="refs-details">
+        <summary>References</summary>
+        <ol class="refs-list">
+          <li>Redmon, J. &amp; Farhadi, A. (2018). YOLOv3: An incremental improvement. <em>arXiv:1804.02767</em>.</li>
+          <li>Jocher, G., Chaurasia, A. &amp; Qiu, J. (2023). Ultralytics YOLOv8. <em>github.com/ultralytics/ultralytics</em>.</li>
+          <li>Shao, S. et al. (2018). CrowdHuman: A benchmark for detecting human in a crowd. <em>arXiv:1805.00123</em>.</li>
+          <li>Zhang, S. et al. (2017). CityPersons: A diverse dataset for pedestrian detection. <em>CVPR 2017</em>.</li>
+          <li>Yin, L. et al. (2015). 'Big data' for pedestrian volume: Exploring the use of Google Street View images for pedestrian counts. <em>Computers, Environment and Urban Systems</em>.</li>
+          <li>Wang, Y. et al. (2021). Unsupervised domain-adaptive scene-specific pedestrian detection for static video surveillance. <em>Pattern Recognition</em>, 118.</li>
+          <li>Li, X. et al. (2022). Occlusion handling and multi-scale pedestrian detection based on deep learning: A review. <em>IEEE Access</em>.</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <p class="card-eyebrow">Strand 2</p>
+      <h2>Street-level imagery for urban analysis</h2>
+      <div class="prose">
+        <p>Biljecki &amp; Ito's (2021) review of 619 papers maps how street-level imagery is used across urban analytics. It identifies deep learning as the dominant method, but flags pedestrian attribute recognition as underdeveloped and Global South cities as sparsely covered. Gebru et al. (2017) inferred neighbourhood demographics from 50 million Street View images of cars across US cities. Green-view and streetscape studies established segmentation as a way to measure the built environment. Mapillary Vistas (Neuhold et al., 2017), which trains this project's segmentation model, made geographically diverse street-scene segmentation possible. This project applies both, people and streetscape, at city scale in a tropical Global South megacity.</p>
+      </div>
+      <details class="refs-details">
+        <summary>References</summary>
+        <ol class="refs-list">
+          <li>Biljecki, F. &amp; Ito, K. (2021). Street view imagery in urban analytics and GIS: A review. <em>Landscape and Urban Planning</em>, 215, 104217.</li>
+          <li>Gebru, T. et al. (2017). Using deep learning and Google Street View to estimate the demographic makeup of neighborhoods across the United States. <em>PNAS</em>, 114(50).</li>
+          <li>Naik, N. et al. (2017). Computer vision uncovers predictors of physical urban change. <em>PNAS</em>, 114(29).</li>
+          <li>Li, X. et al. (2015). Assessing street-level urban greenery using Google Street View and a modified green view index. <em>Urban Forestry &amp; Urban Greening</em>, 14(3).</li>
+          <li>Seiferling, I. et al. (2017). Green streets: Quantifying and mapping urban trees with street-level imagery and computer vision. <em>Landscape and Urban Planning</em>, 165.</li>
+          <li>Neuhold, G. et al. (2017). The Mapillary Vistas dataset for semantic understanding of street scenes. <em>ICCV 2017</em>.</li>
+          <li>Chen, L. et al. (2020). Estimating pedestrian volume using street view images: A large-scale validation test. <em>Computers, Environment and Urban Systems</em>, 81.</li>
+          <li>Yue, H. et al. (2022). Detecting people on the street and the streetscape physical environment from Baidu Street View images. <em>ISPRS International Journal of Geo-Information</em>, 11(3).</li>
+          <li>Chen, L. et al. (2022). Examining the association between the built environment and pedestrian volume using street view images. <em>Cities</em>, 127.</li>
+          <li>Zhang, F. et al. (2024). Urban visual intelligence: Studying cities with artificial intelligence and street-level imagery. <em>Annals of the American Association of Geographers</em>, 114(2).</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <p class="card-eyebrow">Strand 3</p>
+      <h2>Domain adaptation</h2>
+      <div class="prose">
+        <p>Pan &amp; Yang's (2010) taxonomy describes this pipeline's setting: the source data (PA-100K, PETA) and target data (Jakarta Street View) share a task but not a distribution. The leading unsupervised methods, DANN (Ganin et al., 2016), ADDA (Tzeng et al., 2017) and CORAL (Sun &amp; Saenko, 2016), align feature spaces without target labels, but assume a modest domain gap. GeoNet (Kalluri et al., 2023) shows that assumption strains even across geographies with similar cameras. Jakarta's gap is wider still: surveillance footage to panoramic street imagery, temperate to tropical light, and different clothing and head coverings. So this project uses supervised adaptation instead. The model is pre-trained on PA-100K and then fine-tuned on a mix of benchmark data and hand-labelled Jakarta crops. Calibration then corrects the remaining mismatch between training and deployment priors. This trades annotation effort for reliability on a target domain the standard tools weren't built for.</p>
+      </div>
+      <details class="refs-details">
+        <summary>References</summary>
+        <ol class="refs-list">
+          <li>Pan, S.J. &amp; Yang, Q. (2010). A survey on transfer learning. <em>IEEE Transactions on Knowledge and Data Engineering</em>, 22(10).</li>
+          <li>Zhuang, F. et al. (2021). A comprehensive survey on transfer learning. <em>Proceedings of the IEEE</em>, 109(1).</li>
+          <li>Ganin, Y. et al. (2016). Domain-adversarial training of neural networks. <em>Journal of Machine Learning Research</em>, 17(59).</li>
+          <li>Tzeng, E., Hoffman, J., Saenko, K. &amp; Darrell, T. (2017). Adversarial discriminative domain adaptation. <em>CVPR 2017</em>.</li>
+          <li>Sun, B. &amp; Saenko, K. (2016). Deep CORAL: Correlation alignment for deep domain adaptation. <em>ECCV 2016 Workshops</em>.</li>
+          <li>Kalluri, T., Xu, W. &amp; Chandraker, M. (2023). GeoNet: Benchmarking unsupervised adaptation across geographies. <em>CVPR 2023</em>.</li>
+          <li>Nguyen, V.D. et al. (2024). Tackling domain shifts in person re-identification: A survey and analysis. <em>CVPR Workshop on Continual Learning in Vision</em>.</li>
+          <li>Alabsi, B.A. et al. (2025). Woman hijab detection using transfer learning. <em>Journal of Information Systems and Digital Technologies</em>, 7(1).</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <p class="footer-affiliation">London School of Economics and Political Science &middot; International Growth Centre</p>
+      <p class="footer-name">Site by Rashmi A. Singh &middot; <a href="index.html#team" class="inline-link">team credits</a></p>
+    </div>
+    <div>
+      <p class="footer-note">Working research site &mdash; figures may be revised as the study is finalised.</p>
+      <a href="https://github.com/rashmi-a-singh/gsv-jakarta" class="footer-github">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5a10.5 10.5 0 0 0-3.32 20.47c.53.1.72-.23.72-.51v-1.98c-2.94.64-3.56-1.28-3.56-1.28-.48-1.22-1.18-1.55-1.18-1.55-.96-.66.07-.65.07-.65 1.07.08 1.63 1.1 1.63 1.1.94 1.62 2.47 1.15 3.08.88.1-.68.37-1.15.67-1.42-2.35-.27-4.82-1.17-4.82-5.23 0-1.16.41-2.1 1.1-2.84-.11-.27-.48-1.36.1-2.83 0 0 .9-.29 2.95 1.08a10.2 10.2 0 0 1 5.37 0c2.04-1.37 2.94-1.08 2.94-1.08.59 1.47.22 2.56.11 2.83.68.74 1.1 1.68 1.1 2.84 0 4.07-2.48 4.96-4.84 5.22.38.33.72.97.72 1.96v2.9c0 .28.19.62.73.51A10.5 10.5 0 0 0 12 1.5z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

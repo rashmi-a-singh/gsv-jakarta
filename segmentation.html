@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Segmentation — GSV-Jakarta</title>
+<meta name="description" content="Streetscape segmentation across ~1.4M Jakarta Street View images with YOLOv8x-seg trained on Mapillary Vistas: what the streets are made of, consistency checks across phases and years, and the safeguards behind the data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Shared additions (kept in-page so style.css doesn't need replacing) */
+  .inline-link { text-decoration: underline; text-underline-offset: 2px; }
+  .prose a, .caveat-note a, .credit-line a { text-decoration: underline; text-underline-offset: 2px; color: var(--text-primary); }
+  .figure-card { background: var(--surface); }
+  .diagram-wrap.wide svg { min-width: 880px; }
+  .scroll-hint { display: none; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-tertiary); margin: 0 0 0.5rem; }
+  @media (max-width: 900px) { .scroll-hint { display: block; } }
+  .dg-box { fill: var(--surface); stroke: var(--border-strong); stroke-width: 1; }
+  .dg-box-a { fill: var(--surface); stroke: var(--phase-1a); stroke-width: 1.4; }
+  .dg-box-b { fill: var(--surface); stroke: var(--phase-2); stroke-width: 1.4; }
+  .dg-box-out { fill: rgba(111,163,216,0.08); stroke: var(--phase-1a); stroke-width: 1.4; }
+  .dg-num { fill: var(--phase-1a); font-family: var(--font-mono); font-size: 11px; font-weight: 500; }
+  .dg-num-b { fill: var(--phase-2); font-family: var(--font-mono); font-size: 11px; font-weight: 500; }
+  .dg-title { fill: var(--text-primary); font-family: var(--font-body); font-size: 14px; font-weight: 600; }
+  .dg-sub { fill: var(--text-secondary); font-family: var(--font-mono); font-size: 11px; }
+  .dg-note { fill: var(--text-tertiary); font-family: var(--font-mono); font-size: 10.5px; }
+  .dg-track { fill: var(--text-tertiary); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; }
+  .dg-line { stroke: var(--border-strong); stroke-width: 1.5; fill: none; }
+  .dg-drop { stroke: var(--text-tertiary); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+  .dg-w { fill: var(--phase-3); }
+  .dg-m { fill: var(--phase-1a); }
+  .dg-c { fill: var(--phase-1b); }
+  .dg-x { fill: var(--text-tertiary); }
+  .diagram-caption { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; max-width: 74ch; margin: 0.6rem 0 0; }
+  .credit-line { font-size: 0.85rem; color: var(--text-tertiary); max-width: 74ch; line-height: 1.6; margin: 1.25rem 0 0; }
+  .formula-box { max-width: 74ch; }
+  .walk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: 1.5rem 0 0.5rem; }
+  .walk-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.9rem; margin: 0; }
+  .walk-card svg { width: 100%; height: auto; border-radius: 6px; }
+  .walk-step { font-family: var(--font-mono); font-size: 0.72rem; color: var(--phase-1a); letter-spacing: 0.08em; text-transform: uppercase; margin: 0.75rem 0 0.25rem; }
+  .walk-text { font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5; margin: 0; }
+  .tag-illustrative { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-tertiary); border: 1px solid var(--border-strong); border-radius: 4px; padding: 0.15rem 0.5rem; letter-spacing: 0.04em; }
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
+  .team-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+  .team-card h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; margin: 0 0 0.25rem; }
+  .team-role { font-family: var(--font-mono); font-size: 0.75rem; color: var(--phase-1a); margin: 0 0 0.8rem; letter-spacing: 0.02em; }
+  .team-card ul { margin: 0; padding-left: 1.1rem; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; }
+  .lesson-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">GSV<span>·Jakarta</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="data.html" class="nav-link">Data</a>
+      <a href="pipeline.html" class="nav-link">Pipeline</a>
+      <a href="segmentation.html" class="nav-link active">Segmentation</a>
+      <a href="validation.html" class="nav-link">Validation</a>
+      <a href="litreview.html" class="nav-link">Related work</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <p class="eyebrow">Streetscape</p>
+      <h1 class="page-title">Segmentation</h1>
+      <p class="page-intro">Pixel-level streetscape composition for 1,411,446 unique images across four collection phases: what Jakarta's streets are made of, how consistent that picture is across phases and years, and the checks that keep it trustworthy.</p>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>The model and its output</h2>
+      <div class="prose">
+        <p>A <strong>YOLOv8x-seg</strong> model trained on <strong>Mapillary Vistas</strong> (37 classes) runs on every image at 640 &times; 640 with confidence 0.20. Mapillary Vistas was chosen for its geographic diversity. No Jakarta-specific fine-tuning was done. For each image the pipeline stores the share of pixels covered by each of <strong>28 retained categories</strong>, including sidewalk, curb, crosswalk, road, lane marking, building, wall, fence, street furniture, vegetation and terrain. Only these ratios are written to disk, never the masks, which keeps 1.4M images within Kaggle's storage limits.</p>
+        <p>Inference runs one phase at a time with checkpoints every few hundred images, so a dropped GPU session resumes where it stopped. The per-phase outputs are then merged and attached to the sampling frame. That gives one row per image with a <code>has_segmentation</code> flag, so unsegmented rows can never be mistaken for empty streets.</p>
+      </div>
+      <div class="stat-inline-row">
+        <div class="stat-inline"><span class="stat-value">1,411,446</span><span class="stat-label">unique images segmented</span></div>
+        <div class="stat-inline"><span class="stat-value">28</span><span class="stat-label">streetscape categories kept</span></div>
+        <div class="stat-inline"><span class="stat-value">527 / 527</span><span class="stat-label">identical inputs gave identical outputs in a determinism test</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Challenge: a silent model fallback</h2>
+      <div class="prose">
+        <p>The first Phase 3 run looked wrong next to the other phases: near-zero vegetation and building, an inflated crosswalk share, and 22.8% of rows blank across all 28 classes. The source images were normal. The cause was the model file. The weights path didn't resolve, so the notebook fell back to a generic COCO model without raising an error, and Mapillary class labels were applied to COCO's predictions. Re-running the correct weights on test images gave completely different results, which confirmed the cause.</p>
+        <p>Phase 3 was re-segmented with the right model, and the fallback was removed altogether. The pipeline now <strong>halts</strong> unless the weights file exists, has exactly 37 classes, and carries the expected names at known class IDs. A wrong model now stops the run instead of quietly producing plausible numbers.</p>
+      </div>
+      <div class="figure-card">
+        <img src="assets/segmentation/fig7_data_quality_panel.png" alt="Three-panel data quality chart: rows per phase, fully-blank segmentation rows by phase, and missing capture month by phase">
+        <div class="figure-caption">
+          <span class="figure-caption-text">After the fix, every phase has under 0.1% fully blank rows. Missing capture months (right) were patched from the master panorama list, leaving 3.6% in Phase 2 and 1.0% in Phase 3.</span>
+          <span class="figure-caption-tag">per-phase files, before merging</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>What Jakarta's streets are made of</h2>
+      <div class="prose">
+        <p>Across all images, vegetation, road and building dominate the frame, together about three-fifths of average pixel coverage. Pedestrian infrastructure (sidewalk, curb, crosswalk) is a small share, consistent with a street network built mainly around vehicles and motorbikes.</p>
+      </div>
+      <div class="figure-card">
+        <img src="assets/segmentation/fig1_class_distribution.png" alt="Horizontal bar chart of segmentation class shares pooled across all phases, ranked from vegetation down to near-zero classes">
+        <div class="figure-caption">
+          <span class="figure-caption-text">Vegetation (21.3%), road (19.3%) and building (18.7%) lead; sidewalk, curb and crosswalk together sit well under 5%.</span>
+          <span class="figure-caption-tag">~1.4M images</span>
+        </div>
+      </div>
+      <div class="caveat-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.2" r="0.3" fill="currentColor"/></svg>
+        <span>The segmentation model's own <code>woman</code>, <code>child</code> and <code>other_rider</code> classes are zero in every image, because those heads were never trained. That doesn't mean "no women were found". People are counted only by the separate <a href="pipeline.html">pedestrian pipeline</a>.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Consistency across phases</h2>
+      <div class="prose">
+        <p>Each phase covers different parts of the city, so a phase that looked very different from the rest would point to a processing problem. They look alike. The mild gradient between them, with road rising and building falling from Phase 1a to Phase 3, is geographic, not technical. On identical images run through two phases, the difference runs the opposite way to the aggregate trend.</p>
+        <p>Two questions are asked of each class: does it appear in an image at all (<strong>presence rate</strong>), and how much of the frame does it cover (<strong>pixel share</strong>)? A class can be present almost everywhere and still cover little of any one frame, so both are reported.</p>
+      </div>
+      <div class="figure-card">
+        <img src="assets/segmentation/fig2_phase_comparison.png" alt="Bar chart comparing mean pixel share across the four collection phases for eight streetscape classes">
+        <div class="figure-caption">
+          <span class="figure-caption-text">Eight core classes by phase: similar levels, with a mild geographic gradient.</span>
+          <span class="figure-caption-tag">phases 1a &middot; 1b &middot; 2 &middot; 3</span>
+        </div>
+      </div>
+      <div class="figure-card">
+        <img src="assets/segmentation/fig5_infrastructure_presence.png" alt="Bar chart of presence rate by phase for sidewalk, crosswalk, vegetation and building">
+        <div class="figure-caption">
+          <span class="figure-caption-text">Vegetation appears in 96% of images in every phase; crosswalk in about 1%. Presence rates agree within a point or two across phases.</span>
+          <span class="figure-caption-tag">share of images with ratio &gt; 0</span>
+        </div>
+      </div>
+      <div class="figure-card">
+        <img src="assets/segmentation/fig3_distribution_spread.png" alt="Box plots of pixel share by phase for eight streetscape classes">
+        <div class="figure-caption">
+          <span class="figure-caption-text">Averages hide wide variation between streets, but medians and interquartile ranges overlap closely across phases.</span>
+          <span class="figure-caption-tag">box = IQR, line = median</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Changes over time</h2>
+      <div class="prose">
+        <p>Pooling by capture year, the four phase lines move together within every class, the clearest single sign that Phase 3 now behaves like the rest. Some year-to-year swings are sharp and shared by every phase at once: the 2014 spike in road and curb, and the jump in building share in 2018&ndash;19. A change that sudden and that uniform is more likely to reflect how and where imagery was captured that year than real change in the city. These series shouldn't be read as urban change without further checks.</p>
+      </div>
+      <div class="figure-card">
+        <img src="assets/segmentation/fig4_year_over_year.png" alt="Eight line-chart panels of year-over-year pixel share from 2013 to 2019 for vegetation, building, road, sidewalk, crosswalk, curb, wall and lane marking, one line per phase">
+        <div class="figure-caption">
+          <span class="figure-caption-text">All four phases move together year to year within each class.</span>
+          <span class="figure-caption-tag">2013&ndash;2019</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>How classes relate to each other</h2>
+      <div class="prose">
+        <p>Correlating class shares across images surfaces one strong relationship: building and vegetation are negatively correlated (r &asymp; &minus;0.6 to &minus;0.7). More built-up frames show less greenery. Most other pairs sit close to zero.</p>
+      </div>
+      <div class="figure-card">
+        <img src="assets/segmentation/fig6_cooccurrence_heatmap.png" alt="Correlation heatmap of segmentation class shares, with building and vegetation strongly negatively correlated">
+        <div class="figure-caption">
+          <span class="figure-caption-text">Building&ndash;vegetation is the standout pair; nearly every other pair sits within &plusmn;0.25.</span>
+          <span class="figure-caption-tag">Pearson r</span>
+        </div>
+      </div>
+      <p class="credit-line">Segmentation pipeline, merge and figures by Rashmi A. Singh. The study uses these features to describe the visible street environment, for example sidewalks, enclosure and greenery.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <p class="footer-affiliation">London School of Economics and Political Science &middot; International Growth Centre</p>
+      <p class="footer-name">Site by Rashmi A. Singh &middot; <a href="index.html#team" class="inline-link">team credits</a></p>
+    </div>
+    <div>
+      <p class="footer-note">Working research site &mdash; figures may be revised as the study is finalised.</p>
+      <a href="https://github.com/rashmi-a-singh/gsv-jakarta" class="footer-github">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5a10.5 10.5 0 0 0-3.32 20.47c.53.1.72-.23.72-.51v-1.98c-2.94.64-3.56-1.28-3.56-1.28-.48-1.22-1.18-1.55-1.18-1.55-.96-.66.07-.65.07-.65 1.07.08 1.63 1.1 1.63 1.1.94 1.62 2.47 1.15 3.08.88.1-.68.37-1.15.67-1.42-2.35-.27-4.82-1.17-4.82-5.23 0-1.16.41-2.1 1.1-2.84-.11-.27-.48-1.36.1-2.83 0 0 .9-.29 2.95 1.08a10.2 10.2 0 0 1 5.37 0c2.04-1.37 2.94-1.08 2.94-1.08.59 1.47.22 2.56.11 2.83.68.74 1.1 1.68 1.1 2.84 0 4.07-2.48 4.96-4.84 5.22.38.33.72.97.72 1.96v2.9c0 .28.19.62.73.51A10.5 10.5 0 0 0 12 1.5z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
