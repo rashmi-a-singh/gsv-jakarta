@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Validation — GSV-Jakarta</title>
+<meta name="description" content="Testing the GSV-Jakarta pipeline against blind hand labels: a weighted 343-photo audit of public-space photographs, what the pipeline counts and misses, and why detection error is not gender-neutral.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Shared additions (kept in-page so style.css doesn't need replacing) */
+  .inline-link { text-decoration: underline; text-underline-offset: 2px; }
+  .prose a, .caveat-note a, .credit-line a { text-decoration: underline; text-underline-offset: 2px; color: var(--text-primary); }
+  .figure-card { background: var(--surface); }
+  .diagram-wrap.wide svg { min-width: 880px; }
+  .scroll-hint { display: none; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-tertiary); margin: 0 0 0.5rem; }
+  @media (max-width: 900px) { .scroll-hint { display: block; } }
+  .dg-box { fill: var(--surface); stroke: var(--border-strong); stroke-width: 1; }
+  .dg-box-a { fill: var(--surface); stroke: var(--phase-1a); stroke-width: 1.4; }
+  .dg-box-b { fill: var(--surface); stroke: var(--phase-2); stroke-width: 1.4; }
+  .dg-box-out { fill: rgba(111,163,216,0.08); stroke: var(--phase-1a); stroke-width: 1.4; }
+  .dg-num { fill: var(--phase-1a); font-family: var(--font-mono); font-size: 11px; font-weight: 500; }
+  .dg-num-b { fill: var(--phase-2); font-family: var(--font-mono); font-size: 11px; font-weight: 500; }
+  .dg-title { fill: var(--text-primary); font-family: var(--font-body); font-size: 14px; font-weight: 600; }
+  .dg-sub { fill: var(--text-secondary); font-family: var(--font-mono); font-size: 11px; }
+  .dg-note { fill: var(--text-tertiary); font-family: var(--font-mono); font-size: 10.5px; }
+  .dg-track { fill: var(--text-tertiary); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; }
+  .dg-line { stroke: var(--border-strong); stroke-width: 1.5; fill: none; }
+  .dg-drop { stroke: var(--text-tertiary); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+  .dg-w { fill: var(--phase-3); }
+  .dg-m { fill: var(--phase-1a); }
+  .dg-c { fill: var(--phase-1b); }
+  .dg-x { fill: var(--text-tertiary); }
+  .diagram-caption { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; max-width: 74ch; margin: 0.6rem 0 0; }
+  .credit-line { font-size: 0.85rem; color: var(--text-tertiary); max-width: 74ch; line-height: 1.6; margin: 1.25rem 0 0; }
+  .formula-box { max-width: 74ch; }
+  .walk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: 1.5rem 0 0.5rem; }
+  .walk-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.9rem; margin: 0; }
+  .walk-card svg { width: 100%; height: auto; border-radius: 6px; }
+  .walk-step { font-family: var(--font-mono); font-size: 0.72rem; color: var(--phase-1a); letter-spacing: 0.08em; text-transform: uppercase; margin: 0.75rem 0 0.25rem; }
+  .walk-text { font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5; margin: 0; }
+  .tag-illustrative { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-tertiary); border: 1px solid var(--border-strong); border-radius: 4px; padding: 0.15rem 0.5rem; letter-spacing: 0.04em; }
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
+  .team-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+  .team-card h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; margin: 0 0 0.25rem; }
+  .team-role { font-family: var(--font-mono); font-size: 0.75rem; color: var(--phase-1a); margin: 0 0 0.8rem; letter-spacing: 0.02em; }
+  .team-card ul { margin: 0; padding-left: 1.1rem; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; }
+  .lesson-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">GSV<span>·Jakarta</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="data.html" class="nav-link">Data</a>
+      <a href="pipeline.html" class="nav-link">Pipeline</a>
+      <a href="segmentation.html" class="nav-link">Segmentation</a>
+      <a href="validation.html" class="nav-link active">Validation</a>
+      <a href="litreview.html" class="nav-link">Related work</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <p class="eyebrow">Ground truth</p>
+      <h1 class="page-title">Validation</h1>
+      <p class="page-intro">A pipeline that runs on 1.4 million images needs evidence about where it's right and where it isn't. This page covers the checks against human labels: what was tested, what the pipeline gets right, and where its errors concentrate.</p>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Two questions, kept separate</h2>
+      <div class="prose">
+        <p>Validation asks two different things. <strong>Are the people it detects classified sensibly?</strong> That is a question about the classifiers and calibration. <strong>Does it find everyone who is there?</strong> That is a question about detection and the gates, and no amount of calibration can fix a person who was never detected.</p>
+      </div>
+      <div class="stage-grid">
+        <div class="stage-card">
+          <p class="card-eyebrow">Classification</p>
+          <h3>Calibration on audited crops</h3>
+          <p>Fitted and cross-validated on a separate hand audit of detected crops. Multiclass Brier score falls from <strong>0.460 to 0.278</strong>. See the <a href="pipeline.html">Pipeline</a> page.</p>
+        </div>
+        <div class="stage-card">
+          <p class="card-eyebrow">Detection</p>
+          <h3>Blind audit of park photos</h3>
+          <p>A probability-weighted, blind hand-labelled sample that measures what the full pipeline counts against what is really in the frame. Detailed below.</p>
+        </div>
+        <div class="stage-card">
+          <p class="card-eyebrow">Street imagery</p>
+          <h3>Hand-labelled panoramas</h3>
+          <p>A separate, larger hand-labelled sample of street panoramas sets the study's headline levels. Spatial rankings and broad time patterns are similar in the hand-labelled and machine samples. Further work on this comparison is in progress.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <p class="card-eyebrow">Detection audit</p>
+      <h2>A blind, weighted audit of 343 photographs</h2>
+      <div class="prose">
+        <p>The pipeline was also run on 2,436 usable visitor photographs of Jakarta's RPTRA child-friendly public spaces. A sample of these was hand-labelled to measure what the pipeline misses.</p>
+        <p><strong>Sample design.</strong> All 2,436 photos were split into six strata by how the pipeline had behaved on them: no detections, every detection removed by the rider gate, organised events, posed photos, and ordinary park scenes with and without people. Sampling was deliberately heavier where the pipeline was expected to fail. The stratum where the gate removed everyone was taken in full. Inverse-probability weights sum exactly to 2,436, so weighted figures describe the whole collection.</p>
+        <p><strong>Labelling.</strong> All 343 photos (208 parks) were annotated <strong>blind</strong> in CVAT, with no machine boxes shown. That gave 2,563 people labelled woman, man, child or unknown. A cold re-label of 25 photos at least three days later gave Cohen's &kappa; = <strong>0.85</strong> on the labels. Hand boxes were then matched to pipeline boxes by IoU, which allowed every real person to be traced through the pipeline.</p>
+      </div>
+      <div class="stat-inline-row">
+        <div class="stat-inline"><span class="stat-value">343</span><span class="stat-label">photos, 208 parks, 6 strata</span></div>
+        <div class="stat-inline"><span class="stat-value">2,563</span><span class="stat-label">people hand-labelled, blind</span></div>
+        <div class="stat-inline"><span class="stat-value">&kappa; = 0.85</span><span class="stat-label">re-label agreement</span></div>
+        <div class="stat-inline"><span class="stat-value">52.7%</span><span class="stat-label">of real people counted by the pipeline (95% CI 46.6&ndash;58.9)</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Where the misses happen</h2>
+      <div class="prose">
+        <p>Tracing every hand-labelled person through the pipeline shows that most losses come from detection, not classification. The rider gate is the second-largest loss. In a park, where almost no one is riding, the gate removes people it shouldn't.</p>
+      </div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 900 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Of all real people in the hand-labelled photos, 41.3% were counted by the pipeline, 13.5% were detected but removed by the rider gate, 0.5% were removed by the vehicle-overlap rule, and 44.6% were never detected.">
+          <text x="40" y="30" class="dg-track">WHERE THE REAL PEOPLE WENT · WEIGHTED TO ALL 2,436 PHOTOS</text>
+          <rect x="40.0" y="60" width="338.7" height="44" fill="var(--phase-1a)"/><rect x="378.7" y="60" width="110.7" height="44" fill="var(--phase-1b)"/><rect x="489.4" y="60" width="4.1" height="44" fill="#e06c75"/><rect x="493.5" y="60" width="365.7" height="44" fill="#4a4d5c"/>
+          <text x="48.0" y="87" class="dg-title" style="fill:#13131a">41.3%</text><text x="40.0" y="128" class="dg-sub">counted</text><text x="386.7" y="87" class="dg-title" style="fill:#13131a">13.5%</text><text x="378.7" y="128" class="dg-sub">removed by rider gate</text><text x="501.5" y="87" class="dg-title" style="fill:#13131a">44.6%</text><text x="860" y="128" class="dg-sub" text-anchor="end">never detected</text><text x="634" y="52" class="dg-note" text-anchor="middle">0.5% vehicle-overlap rule</text><path d="M634,55 L634,60" class="dg-drop"/>
+        </svg>
+      </div>
+      <div class="prose" style="margin-top:1.5rem">
+        <p><strong>Errors partly cancel.</strong> 21.5% of the pipeline's detections match no real person. Those false positives offset some of the misses, so aggregate adult totals can look close to the hand count while individual photos are badly off. Per-photo counts correlate at only r = 0.645. Aggregate agreement isn't person-level validation, so the share is always reported alongside the correlation and the false-positive rate.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Detection error isn't gender-neutral</h2>
+      <div class="prose">
+        <p>Hand-labelled women were missed more often than men.</p>
+      </div>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 900 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Share of hand-labelled people never detected: women 46.4 percent, men 34.1 percent.">
+          <text x="40" y="22" class="dg-track">NEVER DETECTED, BY HAND LABEL</text>
+          <text x="40" y="58" class="dg-sub">women</text>
+          <rect x="120" y="42" width="278.4" height="24" class="dg-w"/>
+          <text x="408.4" y="59" class="dg-title">46.4%</text>
+          <text x="40" y="100" class="dg-sub">men</text>
+          <rect x="120" y="84" width="204.6" height="24" class="dg-m"/>
+          <text x="334.6" y="101" class="dg-title">34.1%</text>
+        </svg>
+      </div>
+      <div class="prose" style="margin-top:1.25rem">
+        <p>The gap isn't a size effect: box heights are similar by label, and the gap persists within every size band. It is largely about <strong>crowds</strong>. Misses rise from about 12% in photos with 1&ndash;3 people to about 58% in photos with more than 20, and women in these photos are much more often in large groups. Within crowd-size bands, most of the gap disappears. This is measurement error that comes from who appears in crowds, and the study treats it as a threat to the street-presence estimates.</p>
+        <p><strong>Children are the weakest class.</strong> Children are 44.7% of the people in these photos. Hard-label outputs assign none at all, and summed calibrated probabilities recover only 7.2% of them. The classifiers were trained mostly on adult pedestrians in street imagery, and a park full of children is far from that domain.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2>Lessons from building the audit</h2>
+      <div class="lesson-grid">
+        <div class="stage-card">
+          <p class="card-eyebrow">Analysis</p>
+          <h3>An empty image is data, not missing data</h3>
+          <p>Starting a per-image analysis from the list of <em>boxes</em> silently drops photos with no hand-labelled people. That also drops the pipeline's false positives inside them and understates the false-positive rate. Per-image analysis must start from the list of images.</p>
+        </div>
+        <div class="stage-card">
+          <p class="card-eyebrow">Annotation</p>
+          <h3>Never pre-select a value in a label schema</h3>
+          <p>A posture attribute defaulted to "standing", so untouched boxes were indistinguishable from deliberate ones, and the attribute couldn't be used. Defaults should be an explicit "unset".</p>
+        </div>
+        <div class="stage-card">
+          <p class="card-eyebrow">Matching</p>
+          <h3>Check orientation before matching boxes</h3>
+          <p>The annotation tool applies photo rotation metadata on upload, but the pipeline reads raw pixels. The matching script refuses to run if image dimensions come back transposed.</p>
+        </div>
+      </div>
+      <div class="caveat-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.2" r="0.3" fill="currentColor"/></svg>
+        <span><strong>Scope.</strong> These photos are user-uploaded park photos, not Street View panoramas, so they test the pipeline under a domain shift. The numbers describe performance on this collection and shouldn't be read as street-level error rates. They do show which failure modes to watch for: crowds, children and the rider gate. Sample design, annotation and audit analysis by Rashmi A. Singh; the estimates as reported in the study are Muskan Jain's.</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <p class="footer-affiliation">London School of Economics and Political Science &middot; International Growth Centre</p>
+      <p class="footer-name">Site by Rashmi A. Singh &middot; <a href="index.html#team" class="inline-link">team credits</a></p>
+    </div>
+    <div>
+      <p class="footer-note">Working research site &mdash; figures may be revised as the study is finalised.</p>
+      <a href="https://github.com/rashmi-a-singh/gsv-jakarta" class="footer-github">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5a10.5 10.5 0 0 0-3.32 20.47c.53.1.72-.23.72-.51v-1.98c-2.94.64-3.56-1.28-3.56-1.28-.48-1.22-1.18-1.55-1.18-1.55-.96-.66.07-.65.07-.65 1.07.08 1.63 1.1 1.63 1.1.94 1.62 2.47 1.15 3.08.88.1-.68.37-1.15.67-1.42-2.35-.27-4.82-1.17-4.82-5.23 0-1.16.41-2.1 1.1-2.84-.11-.27-.48-1.36.1-2.83 0 0 .9-.29 2.95 1.08a10.2 10.2 0 0 1 5.37 0c2.04-1.37 2.94-1.08 2.94-1.08.59 1.47.22 2.56.11 2.83.68.74 1.1 1.68 1.1 2.84 0 4.07-2.48 4.96-4.84 5.22.38.33.72.97.72 1.96v2.9c0 .28.19.62.73.51A10.5 10.5 0 0 0 12 1.5z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
